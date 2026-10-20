@@ -1,0 +1,78 @@
+.public-navbar {
+    min-height: 76px;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+    position: relative;
+    z-index: 10;
+}
+
+.careerly-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--primary);
+    font-size: 22px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.careerly-brand:hover {
+    color: var(--primary);
+}
+
+.brand-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    background-color: var(--primary);
+    color: var(--white);
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.public-navbar .nav-link {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+}
+
+.public-navbar .nav-link:hover {
+    color: var(--secondary);
+}
+
+.login-link {
+    color: var(--primary) !important;
+    font-weight: 600 !important;
+}
+
+.get-started-btn {
+    background-color: var(--primary);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.get-started-btn:hover {
+    background-color: var(--secondary);
+    color: var(--white);
+}
+
+@media (max-width: 991px) {
+    .public-navbar .navbar-collapse {
+        padding-top: 15px;
+    }
+
+    .get-started-btn {
+        margin-left: 0;
+        margin-top: 8px;
+    }
+}

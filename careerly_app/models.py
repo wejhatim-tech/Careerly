@@ -72,6 +72,7 @@ class User(models.Model):
     status = models.CharField(max_length=10, default='active')   # active or inactive
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = UserManager()
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -86,6 +87,7 @@ class Profile(models.Model): # each user have one profile One to One Relation
     bio = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = ProfileManager()
 
     def __str__(self):
         return f"{self.user} - {self.target_role}"
@@ -141,6 +143,7 @@ class ContactMessage(models.Model): # No user field : because any visitor can se
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = ContactMessageManager()
 
     def __str__(self):
         return f"{self.name} - {self.subject}"
@@ -158,3 +161,16 @@ class AIReview(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.review_type}"
+
+
+def create_user(data):
+    password = bcrypt.hashpw(data['password'].encode(),bcrypt.gensalt()).decode()
+    return User.objects.create(
+        first_name=data['first_name'],
+        last_name=data['last_name'],
+        email=data['email'],
+        password=password
+    )
+
+def get_user_by_email(email):
+    return User.objects.filter(email=email).first()
