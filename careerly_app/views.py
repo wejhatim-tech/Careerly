@@ -109,3 +109,40 @@ def admin_dashboard(request):
         'contact_messages': models.ContactMessage.objects.all().order_by('-created_at'),
     }
     return render(request, 'admin_dashboard.html', context)
+
+#admin user
+def admin_user(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+    admin = models.User.objects.get(id=request.session['user_id'])
+    if admin.role != 'admin':
+        return redirect('/dashboard')
+
+    context = {
+        'admin': admin,
+        'user': models.User.objects.get(id=id),
+    }
+    return render(request, 'admin_user.html', context)
+
+
+# activate-deactivate the user
+def toggle_user_status(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+    admin = models.User.objects.get(id=request.session['user_id'])
+    if admin.role != 'admin' or request.method != 'POST':
+        return redirect('/dashboard')
+
+    user = models.User.objects.get(id=id)
+    # admin can't activate his self
+    if user.id == admin.id:
+        messages.error(request, 'You cannot deactivate your own account')
+    elif user.status == 'active':
+        user.status = 'inactive'
+        user.save()
+        messages.success(request, 'Account deactivated')
+    else:
+        user.status = 'active'
+        user.save()
+        messages.success(request, 'Account activated')
+    return redirect(f'/admin-dashboard/user/{id}')    

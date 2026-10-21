@@ -64,7 +64,7 @@
                             <td class="muted-cell">{{ user.email }}</td>
                             <td>{{ user.profile.target_role|default:"-" }}</td>
                             <td><span class="status-badge status-{{ user.status }}">{{ user.status|capfirst }}</span></td>
-                            <td><a href="#" class="btn view-btn">View</a></td>
+                            <td><a href="/admin-dashboard/user/{{ user.id }}" class="btn view-btn">View</a></td>
                         </tr>
                         {% empty %}
                         <tr><td colspan="5" class="muted-cell">No users found.</td></tr>

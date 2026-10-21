@@ -161,3 +161,24 @@
     border-color: var(--secondary);
     color: var(--secondary);
 }
+
+/* User details */
+.back-link {
+    display: inline-block;
+    color: var(--secondary);
+    font-size: 14px;
+    text-decoration: none;
+    margin-bottom: 14px;
+}
+
+.detail-label {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.detail-value {
+    color: var(--primary);
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 0;
+}
