@@ -95,3 +95,22 @@
     color:var(--primary); 
     font-weight:600; 
 }
+
+@media (max-width: 991px) {
+    .user-navbar .navbar-collapse {
+        padding: 14px 0;
+    }
+
+    .user-navbar .navbar-nav {
+        align-items: flex-start !important;
+        gap: 6px;
+    }
+
+    .user-navbar .nav-link {
+        padding: 8px 0;
+    }
+
+    .user-navbar .logout-link {
+        margin-top: 4px;
+    }
+}

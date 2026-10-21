@@ -83,3 +83,96 @@ def logout(request):
     request.session.flush()
     return redirect('/')
 
+def profile(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+    profile = models.get_profile_by_user(user.id)
+    skills = models.get_user_skills(user.id)
+    edit_mode = request.GET.get('edit') == 'true'
+
+    context = {
+        'user': user,
+        'profile': profile,
+        'skills': skills,
+        'edit_mode': edit_mode
+    }
+
+    return render(request, 'profile.html', context)
+
+
+def create_profile(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+
+    if models.get_profile_by_user(user.id):
+        return redirect('/profile')
+
+    if request.method == 'POST':
+        errors = models.Profile.objects.profile_validation(request.POST)
+
+        if errors:
+            for value in errors.values():
+                messages.error(request, value)
+            return redirect('/profile')
+
+        models.create_profile(user, request.POST)
+        return redirect('/profile')
+
+    return redirect('/profile')
+
+
+def edit_profile(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+    profile = models.get_profile_by_user(user.id)
+
+    if not profile:
+        return redirect('/profile')
+
+    if request.method == 'POST':
+        errors = models.Profile.objects.profile_validation(request.POST)
+
+        if errors:
+            for value in errors.values():
+                messages.error(request, value)
+            return redirect('/profile?edit=true')
+
+        models.update_profile(profile, request.POST)
+        return redirect('/profile')
+
+    return redirect('/profile?edit=true')
+
+
+def add_skill(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    if request.method == 'POST':
+        skill_name = request.POST.get('skill', '').strip()
+
+        if skill_name:
+            user = models.get_user_by_id(request.session['user_id'])
+            models.add_user_skill(user, skill_name)
+
+    return redirect('/profile')
+
+
+def remove_skill(request, skill_id):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    if request.method == 'POST':
+        models.remove_user_skill(request.session['user_id'], skill_id)
+
+    return redirect('/profile')

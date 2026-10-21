@@ -38,14 +38,18 @@ class UserManager(models.Manager):
 class ProfileManager(models.Manager):
     def profile_validation(self, formdata):
         errors = {}
-        if len(formdata['education']) < 3:
-            errors['education'] = 'Please enter your education'
-        if len(formdata['experience']) < 3:
-            errors['experience'] = 'Please enter your experience'
         if len(formdata['target_role']) < 2:
             errors['target_role'] = 'Please enter your target role'
-        if len(formdata['location']) < 2:
-            errors['location'] = 'Please enter your location'
+        if not formdata.get('career_level'):
+            errors['career_level'] = 'Please select your career level'
+        if not formdata.get('years_experience'):
+            errors['years_experience'] = 'Please enter your years of experience'
+        if len(formdata['preferred_location']) < 2:
+            errors['preferred_location'] = 'Please enter your preferred location'
+        if not formdata.get('work_mode'):
+            errors['work_mode'] = 'Please select your preferred work mode'
+        if not formdata.get('employment_type'):
+            errors['employment_type'] = 'Please select your employment type'
         return errors
 
 
@@ -78,12 +82,14 @@ class User(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
-class Profile(models.Model): # each user have one profile One to One Relation
+class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    education = models.TextField()
-    experience = models.TextField()
     target_role = models.CharField(max_length=100)
-    location = models.CharField(max_length=100)
+    career_level = models.CharField(max_length=30)
+    years_experience = models.PositiveIntegerField(default=0)
+    preferred_location = models.CharField(max_length=100)
+    work_mode = models.CharField(max_length=20)
+    employment_type = models.CharField(max_length=30)
     bio = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -174,3 +180,51 @@ def create_user(data):
 
 def get_user_by_email(email):
     return User.objects.filter(email=email).first()
+
+# Get user by id
+def get_user_by_id(user_id):
+    return User.objects.get(id=user_id)
+
+# Get profile for a specific user
+def get_profile_by_user(user_id):
+    return Profile.objects.filter(user_id=user_id).first()
+
+# Create a new profile
+def create_profile(user, data):
+    return Profile.objects.create(
+        user=user,
+        target_role=data['target_role'],
+        career_level=data['career_level'],
+        years_experience=data['years_experience'],
+        preferred_location=data['preferred_location'],
+        work_mode=data['work_mode'],
+        employment_type=data['employment_type'],
+        bio=data['bio']
+    )
+
+
+# Update an existing profile
+def update_profile(profile, data):
+    profile.target_role = data['target_role']
+    profile.career_level = data['career_level']
+    profile.years_experience = data['years_experience']
+    profile.preferred_location = data['preferred_location']
+    profile.work_mode = data['work_mode']
+    profile.employment_type = data['employment_type']
+    profile.bio = data['bio']
+    profile.save()
+
+    return profile
+
+# Get all skills for a user
+def get_user_skills(user_id):
+    return UserSkill.objects.filter(user_id=user_id).select_related('skill')
+
+# Add a skill to a user
+def add_user_skill(user, skill_name):
+    skill, created = Skill.objects.get_or_create(name=skill_name)
+    UserSkill.objects.get_or_create(user=user, skill=skill)
+
+# Remove a skill from a user
+def remove_user_skill(user_id, skill_id):
+    UserSkill.objects.filter(user_id=user_id, skill_id=skill_id).delete()
