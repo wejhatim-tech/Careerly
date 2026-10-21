@@ -668,3 +668,15 @@ body {
         width: 100%;
     }
 }
+.profile-section-title {
+    color: var(--primary);
+    font-size: 17px;
+    font-weight: 700;
+    margin-top: 10px;
+    margin-bottom: 18px;
+}
+
+.profile-view-title {
+    margin-top: 28px;
+    padding-top: 5px;
+}

@@ -29,36 +29,67 @@
                 <div class="profile-form-container">
                     <p class="profile-label">Career Profile</p>
                     <h1>Complete your profile</h1>
-                    <p class="profile-form-text">Tell Careerly about your career goals so we can find better opportunities for you.</p>
+                    <p class="profile-form-text">Add your career preferences so Careerly can find better job opportunities for you.</p>
 
                     <form action="/profile/create" method="POST">
                         {% csrf_token %}
 
-                        <div class="mb-4">
-                            <label class="form-label">Education</label>
-                            <textarea name="education" class="form-control careerly-input profile-textarea" placeholder="Your education"></textarea>
-                        </div>
+                        <!-- Career Goal -->
+                        <h3 class="profile-section-title">Career Goal</h3>
 
                         <div class="mb-4">
-                            <label class="form-label">Experience</label>
-                            <textarea name="experience" class="form-control careerly-input profile-textarea" placeholder="Your experience"></textarea>
+                            <label class="form-label">Target Role</label>
+                            <input type="text" name="target_role" class="form-control careerly-input" placeholder="Junior Front-End Developer">
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Target Role</label>
-                                <input type="text" name="target_role" class="form-control careerly-input" placeholder="Junior Front-End Developer">
+                                <label class="form-label">Career Level</label>
+                                <select name="career_level" class="form-select careerly-input">
+                                    <option value="">Select level</option>
+                                    <option value="intern">Intern</option>
+                                    <option value="entry">Entry Level</option>
+                                    <option value="junior">Junior</option>
+                                    <option value="mid">Mid Level</option>
+                                    <option value="senior">Senior</option>
+                                </select>
                             </div>
 
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Location</label>
-                                <input type="text" name="location" class="form-control careerly-input" placeholder="Nablus, Palestine">
+                                <label class="form-label">Years of Experience</label>
+                                <input type="number" name="years_experience" min="0" class="form-control careerly-input" placeholder="0">
                             </div>
                         </div>
 
+                        <!-- Job Preferences -->
+                        <h3 class="profile-section-title">Job Preferences</h3>
+
                         <div class="mb-4">
-                            <label class="form-label">Career Summary</label>
-                            <textarea name="bio" class="form-control careerly-input profile-bio" placeholder="Tell us briefly about your career goals"></textarea>
+                            <label class="form-label">Preferred Location</label>
+                            <input type="text" name="preferred_location" class="form-control careerly-input" placeholder="Palestine">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Work Mode</label>
+                                <select name="work_mode" class="form-select careerly-input">
+                                    <option value="">Select work mode</option>
+                                    <option value="remote">Remote</option>
+                                    <option value="hybrid">Hybrid</option>
+                                    <option value="onsite">On-site</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Employment Type</label>
+                                <select name="employment_type" class="form-select careerly-input">
+                                    <option value="">Select employment type</option>
+                                    <option value="full_time">Full-time</option>
+                                    <option value="part_time">Part-time</option>
+                                    <option value="internship">Internship</option>
+                                    <option value="contract">Contract</option>
+                                </select>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn save-profile-btn">Save Profile</button>
@@ -71,36 +102,64 @@
                 <div class="profile-form-container">
                     <p class="profile-label">Career Profile</p>
                     <h1>Edit your profile</h1>
-                    <p class="profile-form-text">Keep your information updated to improve your Careerly recommendations.</p>
+                    <p class="profile-form-text">Update your career preferences to improve your job matches.</p>
 
                     <form action="/profile/edit" method="POST">
                         {% csrf_token %}
 
-                        <div class="mb-4">
-                            <label class="form-label">Education</label>
-                            <textarea name="education" class="form-control careerly-input profile-textarea">{{ profile.education }}</textarea>
-                        </div>
+                        <!-- Career Goal -->
+                        <h3 class="profile-section-title">Career Goal</h3>
 
                         <div class="mb-4">
-                            <label class="form-label">Experience</label>
-                            <textarea name="experience" class="form-control careerly-input profile-textarea">{{ profile.experience }}</textarea>
+                            <label class="form-label">Target Role</label>
+                            <input type="text" name="target_role" class="form-control careerly-input" value="{{ profile.target_role }}">
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Target Role</label>
-                                <input type="text" name="target_role" class="form-control careerly-input" value="{{ profile.target_role }}">
+                                <label class="form-label">Career Level</label>
+                                <select name="career_level" class="form-select careerly-input">
+                                    <option value="intern" {% if profile.career_level == 'intern' %}selected{% endif %}>Intern</option>
+                                    <option value="entry" {% if profile.career_level == 'entry' %}selected{% endif %}>Entry Level</option>
+                                    <option value="junior" {% if profile.career_level == 'junior' %}selected{% endif %}>Junior</option>
+                                    <option value="mid" {% if profile.career_level == 'mid' %}selected{% endif %}>Mid Level</option>
+                                    <option value="senior" {% if profile.career_level == 'senior' %}selected{% endif %}>Senior</option>
+                                </select>
                             </div>
 
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Location</label>
-                                <input type="text" name="location" class="form-control careerly-input" value="{{ profile.location }}">
+                                <label class="form-label">Years of Experience</label>
+                                <input type="number" name="years_experience" min="0" class="form-control careerly-input" value="{{ profile.years_experience }}">
                             </div>
                         </div>
 
+                        <!-- Job Preferences -->
+                        <h3 class="profile-section-title">Job Preferences</h3>
+
                         <div class="mb-4">
-                            <label class="form-label">Career Summary</label>
-                            <textarea name="bio" class="form-control careerly-input profile-bio">{{ profile.bio }}</textarea>
+                            <label class="form-label">Preferred Location</label>
+                            <input type="text" name="preferred_location" class="form-control careerly-input" value="{{ profile.preferred_location }}">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Work Mode</label>
+                                <select name="work_mode" class="form-select careerly-input">
+                                    <option value="remote" {% if profile.work_mode == 'remote' %}selected{% endif %}>Remote</option>
+                                    <option value="hybrid" {% if profile.work_mode == 'hybrid' %}selected{% endif %}>Hybrid</option>
+                                    <option value="onsite" {% if profile.work_mode == 'onsite' %}selected{% endif %}>On-site</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Employment Type</label>
+                                <select name="employment_type" class="form-select careerly-input">
+                                    <option value="full_time" {% if profile.employment_type == 'full_time' %}selected{% endif %}>Full-time</option>
+                                    <option value="part_time" {% if profile.employment_type == 'part_time' %}selected{% endif %}>Part-time</option>
+                                    <option value="internship" {% if profile.employment_type == 'internship' %}selected{% endif %}>Internship</option>
+                                    <option value="contract" {% if profile.employment_type == 'contract' %}selected{% endif %}>Contract</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2">
@@ -117,7 +176,7 @@
                     <div>
                         <p class="profile-label">Career Profile</p>
                         <h1>My Profile</h1>
-                        <p>Keep your career information updated so Careerly can find better opportunities for you.</p>
+                        <p>Your profile helps Careerly find jobs that match your goals and preferences.</p>
                     </div>
 
                     <a href="/profile?edit=true" class="btn profile-edit-btn">Edit Profile</a>
@@ -135,30 +194,41 @@
                         </div>
                     </div>
 
+                    <h3 class="profile-section-title profile-view-title">Career Goal</h3>
+
                     <div class="row profile-details">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <span>Target Role</span>
                             <p>{{ profile.target_role }}</p>
                         </div>
 
-                        <div class="col-md-6">
-                            <span>Location</span>
-                            <p>{{ profile.location }}</p>
+                        <div class="col-md-4">
+                            <span>Career Level</span>
+                            <p>{{ profile.career_level|title }}</p>
                         </div>
 
-                        <div class="col-md-6">
-                            <span>Education</span>
-                            <p>{{ profile.education }}</p>
+                        <div class="col-md-4">
+                            <span>Years of Experience</span>
+                            <p>{{ profile.years_experience }}</p>
+                        </div>
+                    </div>
+
+                    <h3 class="profile-section-title profile-view-title">Job Preferences</h3>
+
+                    <div class="row profile-details">
+                        <div class="col-md-4">
+                            <span>Preferred Location</span>
+                            <p>{{ profile.preferred_location }}</p>
                         </div>
 
-                        <div class="col-md-6">
-                            <span>Experience</span>
-                            <p>{{ profile.experience }}</p>
+                        <div class="col-md-4">
+                            <span>Work Mode</span>
+                            <p>{{ profile.work_mode|title }}</p>
                         </div>
 
-                        <div class="col-12">
-                            <span>Career Summary</span>
-                            <p>{{ profile.bio|default:"No career summary added yet." }}</p>
+                        <div class="col-md-4">
+                            <span>Employment Type</span>
+                            <p>{{ profile.employment_type|title }}</p>
                         </div>
                     </div>
                 </div>
@@ -166,7 +236,7 @@
                 <!-- Skills -->
                 <div class="profile-card skills-card">
                     <h3>Skills</h3>
-                    <p class="skills-description">Add the skills that Careerly should consider when finding jobs for you.</p>
+                    <p class="skills-description">Add the skills Careerly should use when searching for jobs.</p>
 
                     <form action="/profile/skill/add" method="POST" class="skill-form">
                         {% csrf_token %}
@@ -191,6 +261,7 @@
                 </div>
 
             {% endif %}
+
         </div>
     </main>
 
