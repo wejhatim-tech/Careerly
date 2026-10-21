@@ -76,3 +76,22 @@
         margin-top: 8px;
     }
 }
+
+.user-navbar { 
+    min-height:76px; 
+    background:var(--white); 
+    border-bottom:1px 
+    solid var(--border); 
+}
+.user-navbar .nav-link { 
+    color:var(--muted); 
+    font-size:14px; 
+    font-weight:500; 
+}
+.user-navbar .nav-link:hover { 
+    color:var(--secondary); 
+}
+.user-navbar .logout-link { 
+    color:var(--primary); 
+    font-weight:600; 
+}
