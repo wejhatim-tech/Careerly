@@ -91,6 +91,10 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="mb-4">
+                            <label class="form-label">Professional Summary</label>
+                            <textarea name="bio" class="form-control careerly-input profile-bio" placeholder="Write a short summary about your career goals and background"></textarea>
+                        </div>
 
                         <button type="submit" class="btn save-profile-btn">Save Profile</button>
                     </form>
@@ -160,6 +164,10 @@
                                     <option value="contract" {% if profile.employment_type == 'contract' %}selected{% endif %}>Contract</option>
                                 </select>
                             </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Professional Summary</label>
+                            <textarea name="bio" class="form-control careerly-input profile-bio">{{ profile.bio }}</textarea>
                         </div>
 
                         <div class="d-flex gap-2">
@@ -238,33 +246,29 @@
                     <h3>Skills</h3>
                     <p class="skills-description">Add the skills Careerly should use when searching for jobs.</p>
 
-                    <form action="/profile/skill/add" method="POST" class="skill-form">
+                    <form id="skill-form" class="skill-form">
                         {% csrf_token %}
-                        <input type="text" name="skill" class="form-control careerly-input" placeholder="Add a skill">
+                        <input type="text" id="skill-input" name="skill" class="form-control careerly-input" placeholder="Add a skill">
                         <button type="submit" class="btn add-skill-btn">Add Skill</button>
                     </form>
 
-                    <div class="skills-list">
+                    <div class="skills-list" id="skills-list">
                         {% for user_skill in skills %}
-                            <div class="skill-item">
+                            <div class="skill-item" data-skill-id="{{ user_skill.skill.id }}">
                                 <span>{{ user_skill.skill.name }}</span>
-
-                                <form action="/profile/skill/{{ user_skill.skill.id }}/remove" method="POST">
-                                    {% csrf_token %}
-                                    <button type="submit" class="skill-remove">×</button>
-                                </form>
+                                <button type="submit" class="skill-remove">×</button>
                             </div>
                         {% empty %}
-                            <p class="no-skills">No skills added yet.</p>
+                            <p class="no-skills" id="no-skills">No skills added yet.</p>
                         {% endfor %}
                     </div>
                 </div>
 
             {% endif %}
-
         </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/profile.js' %}"></script>
 </body>
 </html>

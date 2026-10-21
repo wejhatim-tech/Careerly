@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from . import models
+from django.http import JsonResponse
 
 
 def index(request):
@@ -110,6 +111,7 @@ def create_profile(request):
 
     user = models.get_user_by_id(request.session['user_id'])
 
+    # Prevent creating more than one profile
     if models.get_profile_by_user(user.id):
         return redirect('/profile')
 
@@ -155,24 +157,34 @@ def edit_profile(request):
 def add_skill(request):
     # Check if user is logged in
     if 'user_id' not in request.session:
-        return redirect('/login')
+        return JsonResponse({'success': False, 'message': 'Please log in first'}, status=401)
 
     if request.method == 'POST':
         skill_name = request.POST.get('skill', '').strip()
 
-        if skill_name:
-            user = models.get_user_by_id(request.session['user_id'])
-            models.add_user_skill(user, skill_name)
+        if not skill_name:
+            return JsonResponse({'success': False, 'message': 'Skill is required'})
 
-    return redirect('/profile')
+        user = models.get_user_by_id(request.session['user_id'])
+        skill = models.add_user_skill(user, skill_name)
+
+        return JsonResponse({
+            'success': True,
+            'skill_id': skill.id,
+            'skill_name': skill.name
+        })
+
+    return JsonResponse({'success': False}, status=400)
 
 
 def remove_skill(request, skill_id):
     # Check if user is logged in
     if 'user_id' not in request.session:
-        return redirect('/login')
+        return JsonResponse({'success': False}, status=401)
 
     if request.method == 'POST':
         models.remove_user_skill(request.session['user_id'], skill_id)
 
-    return redirect('/profile')
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False}, status=400)

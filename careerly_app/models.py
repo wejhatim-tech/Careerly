@@ -225,6 +225,8 @@ def add_user_skill(user, skill_name):
     skill, created = Skill.objects.get_or_create(name=skill_name)
     UserSkill.objects.get_or_create(user=user, skill=skill)
 
+    return skill
+
 # Remove a skill from a user
 def remove_user_skill(user_id, skill_id):
     UserSkill.objects.filter(user_id=user_id, skill_id=skill_id).delete()
