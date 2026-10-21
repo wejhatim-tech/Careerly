@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Careerly</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+    <link rel="stylesheet" href="{% static 'css/about.css' %}">
+</head>
+
+<body>
+    {% include 'partials/public_nav.html' %}
+
+    <main class="about-page">
+        <div class="container">
+
+            <span class="hero-badge">About Careerly</span>
+            <h1 class="about-title">Career guidance that feels focused, practical, and personal.</h1>
+            <p class="about-text">Careerly is an AI-powered career coach that helps job seekers discover relevant opportunities and prepare for each application with more clarity.</p>
+
+            <div class="about-card">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h3>The problem</h3>
+                        <p>Job seekers often face too many irrelevant listings, unclear skill expectations, and scattered preparation tools.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Our solution</h3>
+                        <p>Careerly narrows the search to a few suitable current roles, explains the fit, supports application review, and helps users prepare for interviews.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Meet the team</h2>
+
+            <div class="row g-4">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="team-card">
+                        <div class="team-avatar avatar-dark">K</div>
+                        <h5>Khawla Qusay</h5>
+                        <p>Product &amp; Development</p>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="team-card">
+                        <div class="team-avatar avatar-blue">W</div>
+                        <h5>Wejdan Hatim</h5>
+                        <p>Product &amp; Development</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

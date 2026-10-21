@@ -6,6 +6,9 @@ from . import models
 def index(request):
     return render(request, 'index.html')
 
+def about(request):
+    return render(request, 'about.html')    
+
 def register(request):
     if request.method == 'POST':
         errors = models.User.objects.reg_validation(request.POST)
@@ -47,3 +50,30 @@ def login(request):
         return redirect('/dashboard')
     
     return render(request, 'login.html')
+
+def contact(request):
+    if request.method == 'POST':
+        errors = models.ContactMessage.objects.contact_validation(request.POST)
+        if errors:
+            for value in errors.values():
+                messages.error(request, value)
+            # منحفظ اللي كتبه لحتى ما يرجع يكتبه
+            request.session['contact_name'] = request.POST['name']
+            request.session['contact_email'] = request.POST['email']
+            request.session['contact_subject'] = request.POST['subject']
+            request.session['contact_message'] = request.POST['message']
+            return redirect('/contact')
+
+        models.ContactMessage.objects.create(
+            name=request.POST['name'],
+            email=request.POST['email'],
+            subject=request.POST['subject'],
+            message=request.POST['message'],
+        )
+        # منمسح البيانات المحفوظة بعد النجاح
+        for key in ['contact_name', 'contact_email', 'contact_subject', 'contact_message']:
+            request.session.pop(key, None)
+        messages.success(request, 'Your message has been sent successfully!')
+        return redirect('/contact')
+
+    return render(request, 'contact.html')

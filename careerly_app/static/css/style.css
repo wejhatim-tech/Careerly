@@ -344,3 +344,18 @@ body {
         font-size: 28px;
     }
 }
+/* توسيط محتوى صفحات Register و Login */
+.register-info,
+.login-info {
+    justify-content: center;
+}
+
+.register-form-container,
+.login-form-container {
+    max-width: 480px;
+}
+
+.register-info h1,
+.login-info h1 {
+    font-size: 38px;
+}
