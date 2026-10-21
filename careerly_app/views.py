@@ -146,3 +146,17 @@ def toggle_user_status(request, id):
         user.save()
         messages.success(request, 'Account activated')
     return redirect(f'/admin-dashboard/user/{id}')    
+
+
+def admin_message(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+    admin = models.User.objects.get(id=request.session['user_id'])
+    if admin.role != 'admin':
+        return redirect('/dashboard')
+
+    context = {
+        'admin': admin,
+        'msg': models.ContactMessage.objects.get(id=id),
+    }
+    return render(request, 'admin_message.html', context)
