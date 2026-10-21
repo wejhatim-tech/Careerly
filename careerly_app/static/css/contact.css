@@ -1,0 +1,74 @@
+
+.contact-page {
+    background-color: var(--background);
+    min-height: calc(100vh - 76px);
+    padding: 45px 0 50px;
+}
+
+.contact-title {
+    color: var(--primary);
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.contact-subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+.help-box {
+    height: 100%;
+    background-color: #E8F5FD;
+    border-radius: 16px;
+    padding: 26px;
+}
+
+.help-box h3 {
+    color: var(--primary);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.help-box p {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+.contact-card {
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 26px;
+}
+
+.contact-textarea {
+    height: 120px;
+    padding: 12px 14px;
+    resize: none;
+}
+
+.send-btn {
+    background-color: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 11px 22px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.send-btn:hover {
+    background-color: var(--secondary);
+    color: var(--white);
+}
+
+.alert-success {
+    font-size: 13px;
+    border-radius: 8px;
+    padding: 10px 14px;
+}
