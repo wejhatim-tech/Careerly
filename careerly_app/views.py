@@ -6,6 +6,9 @@ from . import models
 def index(request):
     return render(request, 'index.html')
 
+def about(request):
+    return render(request, 'about.html')    
+
 def register(request):
     if request.method == 'POST':
         errors = models.User.objects.reg_validation(request.POST)
