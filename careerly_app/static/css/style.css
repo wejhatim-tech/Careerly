@@ -359,3 +359,49 @@ body {
 .login-info h1 {
     font-size: 38px;
 }
+
+.careerly-footer {
+    background-color: #12293A;
+    padding: 30px 0 18px;
+}
+
+.footer-icon {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary);
+    color: var(--white);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.footer-text {
+    color: #C9D6E0;
+    font-size: 13px;
+    margin-bottom: 0;
+}
+
+.footer-heading {
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.footer-link {
+    display: block;
+    color: #AFC1CE;
+    font-size: 12px;
+    text-decoration: none;
+    margin-bottom: 2px;
+}
+
+.footer-copy {
+    color: #8FA3B3;
+    font-size: 11px;
+    margin: 18px 0 0;
+}
