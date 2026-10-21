@@ -1,0 +1,234 @@
+.landing-page {
+    background-color: var(--background);
+    min-height: calc(100vh - 76px);
+}
+
+.hero-section {
+    padding: 70px 0 80px;
+}
+
+.hero-badge {
+    display: inline-block;
+    background-color: var(--soft-blue);
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.hero-title {
+    color: var(--primary);
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 18px;
+}
+
+.hero-text {
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 520px;
+    margin-bottom: 28px;
+}
+
+.hero-btn-main {
+    background-color: var(--primary);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 12px 22px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.hero-btn-main:hover {
+    background-color: var(--secondary);
+    color: var(--white);
+}
+
+.hero-btn-outline {
+    background-color: var(--white);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 22px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.hero-btn-outline:hover {
+    border-color: var(--secondary);
+    color: var(--secondary);
+}
+
+
+.matches-box {
+    position: relative;
+    background-color: #E8F5FD;
+    border-radius: 24px;
+    padding: 35px 35px 55px;
+}
+
+.matches-card {
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+}
+
+.matches-card h5 {
+    color: var(--primary);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 18px;
+}
+
+.job-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.job-card h6 {
+    color: var(--primary);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.job-meta {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.match-badge {
+    display: inline-block;
+    background-color: #E3F8EC;
+    color: #1E8E57;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+}
+
+.job-skills {
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.job-improve {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 0;
+}
+
+.details-btn {
+    background-color: var(--white);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+}
+
+.details-btn:hover {
+    border-color: var(--secondary);
+    color: var(--secondary);
+}
+
+.count-card {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+}
+
+.count-card strong {
+    color: var(--primary);
+    font-size: 24px;
+}
+
+.count-card span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.how-section {
+    padding: 20px 0 80px;
+}
+
+.section-title {
+    color: var(--primary);
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 28px;
+}
+
+.step-card {
+    height: 100%;
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+}
+
+.step-icon {
+    width: 40px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #E1F3FD;
+    color: var(--secondary);
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 18px;
+}
+
+.step-card h5 {
+    color: var(--primary);
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.step-card p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .hero-section {
+        padding: 50px 0 60px;
+    }
+
+    .hero-title {
+        font-size: 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 32px;
+    }
+
+    .matches-box {
+        padding: 20px 20px 80px;
+    }
+}
