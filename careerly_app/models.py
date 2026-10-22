@@ -230,3 +230,8 @@ def add_user_skill(user, skill_name):
 # Remove a skill from a user
 def remove_user_skill(user_id, skill_id):
     UserSkill.objects.filter(user_id=user_id, skill_id=skill_id).delete()
+
+
+# Get all applications for a user
+def get_user_applications(user_id):
+    return Application.objects.filter(user_id=user_id).order_by('-created_at')

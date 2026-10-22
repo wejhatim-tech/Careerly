@@ -75,19 +75,26 @@ def get_country_code(location):
 
 
 
-# Search live jobs from Google for Jobs (JSearch API)
+# Search live jobs from Google for Jobs
 def search_jobs(query, country='jo', num=10):
     try:
         response = requests.get(
-            f'{JSEARCH_URL}/search-v2',
+            f'{JSEARCH_URL}/search',
             headers=JSEARCH_HEADERS,
-            params={'query': query, 'num_pages': 1, 'country': country},
+            params={
+                'query': query,
+                'num_pages': 1,
+                'country': country
+            },
             timeout=20,
         )
+
+        response.raise_for_status()
+
         data = response.json().get('data', [])
-        if isinstance(data, dict):
-            data = data.get('jobs', [])
+
         return [clean_job(job) for job in data[:num]]
+
     except Exception as e:
         print('JSearch error:', e)
         return []
