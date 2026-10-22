@@ -17,21 +17,24 @@ if (skillForm) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const noSkills = document.getElementById('no-skills');
-
-                if (noSkills) {
-                    noSkills.remove();
+                if (skillsList.querySelector(`[data-skill-id="${data.skill_id}"]`)) {
+                    skillInput.value = '';
+                    return;
                 }
 
                 const skillItem = document.createElement('div');
                 skillItem.classList.add('skill-item');
                 skillItem.dataset.skillId = data.skill_id;
 
-                skillItem.innerHTML = `
-                    <span>${data.skill_name}</span>
-                    <button type="button" class="skill-remove">×</button>
-                `;
+                const skillName = document.createElement('span');
+                skillName.textContent = data.skill_name;
 
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.classList.add('skill-remove');
+                removeBtn.textContent = '×';
+
+                skillItem.append(skillName, removeBtn);
                 skillsList.appendChild(skillItem);
                 skillInput.value = '';
             }

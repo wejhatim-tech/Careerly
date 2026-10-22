@@ -42,8 +42,8 @@ class ProfileManager(models.Manager):
             errors['target_role'] = 'Please enter your target role'
         if not formdata.get('career_level'):
             errors['career_level'] = 'Please select your career level'
-        if not formdata.get('years_experience'):
-            errors['years_experience'] = 'Please enter your years of experience'
+        if not str(formdata.get('years_experience', '')).isdigit():
+            errors['years_experience'] = 'Years of experience must be a number'
         if len(formdata['preferred_location']) < 2:
             errors['preferred_location'] = 'Please enter your preferred location'
         if not formdata.get('work_mode'):

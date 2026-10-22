@@ -58,7 +58,7 @@ def contact(request):
         if errors:
             for value in errors.values():
                 messages.error(request, value)
-            # منحفظ اللي كتبه لحتى ما يرجع يكتبه
+            # Save input so the user does not retype it
             request.session['contact_name'] = request.POST['name']
             request.session['contact_email'] = request.POST['email']
             request.session['contact_subject'] = request.POST['subject']
@@ -71,7 +71,7 @@ def contact(request):
             subject=request.POST['subject'],
             message=request.POST['message'],
         )
-        # منمسح البيانات المحفوظة بعد النجاح
+        # Clear saved input after success
         for key in ['contact_name', 'contact_email', 'contact_subject', 'contact_message']:
             request.session.pop(key, None)
         messages.success(request, 'Your message has been sent successfully!')
@@ -90,6 +90,9 @@ def profile(request):
         return redirect('/login')
 
     user = models.get_user_by_id(request.session['user_id'])
+    # Admin has no profile page
+    if user.role == 'admin':
+        return redirect('/admin-dashboard')
     profile = models.get_profile_by_user(user.id)
     skills = models.get_user_skills(user.id)
     edit_mode = request.GET.get('edit') == 'true'
