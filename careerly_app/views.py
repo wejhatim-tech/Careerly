@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from . import models
+from django.db.models import Q
 from django.http import JsonResponse
+from . import ai
 
 
 def index(request):
@@ -58,7 +60,7 @@ def contact(request):
         if errors:
             for value in errors.values():
                 messages.error(request, value)
-            # منحفظ اللي كتبه لحتى ما يرجع يكتبه
+            # Save input so the user does not retype it
             request.session['contact_name'] = request.POST['name']
             request.session['contact_email'] = request.POST['email']
             request.session['contact_subject'] = request.POST['subject']
@@ -71,13 +73,95 @@ def contact(request):
             subject=request.POST['subject'],
             message=request.POST['message'],
         )
-        # منمسح البيانات المحفوظة بعد النجاح
+        # Clear saved input after success
         for key in ['contact_name', 'contact_email', 'contact_subject', 'contact_message']:
             request.session.pop(key, None)
         messages.success(request, 'Your message has been sent successfully!')
         return redirect('/contact')
 
     return render(request, 'contact.html')
+
+
+def admin_dashboard(request):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    admin = models.User.objects.get(id=request.session['user_id'])
+    # Normal users cannot access this page
+    if admin.role != 'admin':
+        return redirect('/dashboard')
+
+    # Search by name or email
+    search = request.GET.get('search', '')
+    users = models.User.objects.all().order_by('-created_at')
+    if search:
+        users = users.filter(
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(email__icontains=search)
+        )
+
+    context = {
+        'admin': admin,
+        'users': users,
+        'search': search,
+        'total_users': models.User.objects.count(),
+        'total_applications': models.Application.objects.count(),
+        'total_messages': models.ContactMessage.objects.count(),
+        'contact_messages': models.ContactMessage.objects.all().order_by('-created_at'),
+    }
+    return render(request, 'admin_dashboard.html', context)
+
+#admin user
+def admin_user(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+    admin = models.User.objects.get(id=request.session['user_id'])
+    if admin.role != 'admin':
+        return redirect('/dashboard')
+
+    context = {
+        'admin': admin,
+        'user': models.User.objects.get(id=id),
+    }
+    return render(request, 'admin_user.html', context)
+
+
+# activate-deactivate the user
+def toggle_user_status(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+    admin = models.User.objects.get(id=request.session['user_id'])
+    if admin.role != 'admin' or request.method != 'POST':
+        return redirect('/dashboard')
+
+    user = models.User.objects.get(id=id)
+    # admin can't activate his self
+    if user.id == admin.id:
+        messages.error(request, 'You cannot deactivate your own account')
+    elif user.status == 'active':
+        user.status = 'inactive'
+        user.save()
+        messages.success(request, 'Account deactivated')
+    else:
+        user.status = 'active'
+        user.save()
+        messages.success(request, 'Account activated')
+    return redirect(f'/admin-dashboard/user/{id}')    
+
+
+def admin_message(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+    admin = models.User.objects.get(id=request.session['user_id'])
+    if admin.role != 'admin':
+        return redirect('/dashboard')
+
+    context = {
+        'admin': admin,
+        'msg': models.ContactMessage.objects.get(id=id),
+    }
+    return render(request, 'admin_message.html', context)
 
 
 def logout(request):
@@ -90,6 +174,9 @@ def profile(request):
         return redirect('/login')
 
     user = models.get_user_by_id(request.session['user_id'])
+    # Admin has no profile page
+    if user.role == 'admin':
+        return redirect('/admin-dashboard')
     profile = models.get_profile_by_user(user.id)
     skills = models.get_user_skills(user.id)
     edit_mode = request.GET.get('edit') == 'true'
@@ -188,3 +275,87 @@ def remove_skill(request, skill_id):
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': False}, status=400)
+
+def job_details(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+    if user.role == 'admin':
+        return redirect('/admin-dashboard')
+
+    # Jobs are saved in the session by Find My Best Jobs
+    job_id = request.GET.get('id', '')
+    jobs = request.session.get('jobs', [])
+    job = next((j for j in jobs if j['job_id'] == job_id), None)
+
+
+    if not job:
+        messages.error(request, 'Job not found, please search again')
+        return redirect('/dashboard')
+
+    context = {
+        'user': user,
+        'job': job,
+    }
+    return render(request, 'job_details.html', context)
+
+
+def job_ai(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return JsonResponse({'success': False, 'message': 'Please log in first'}, status=401)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False}, status=400)
+
+    user = models.get_user_by_id(request.session['user_id'])
+    tool = request.POST.get('tool', '')
+    job_id = request.POST.get('job_id', '')
+
+    # Find the job saved in the session
+    jobs = request.session.get('jobs', [])
+    job = next((j for j in jobs if j['job_id'] == job_id), None)
+    if not job:
+        return JsonResponse({'success': False, 'message': 'Job not found, please search again'})
+
+    profile = models.get_profile_by_user(user.id)
+
+    if tool in ['cv', 'cover_letter']:
+        file = request.FILES.get('file')
+        if not file:
+            return JsonResponse({'success': False, 'message': 'Please upload a PDF file'})
+        if not file.name.lower().endswith('.pdf'):
+            return JsonResponse({'success': False, 'message': 'Only PDF files are allowed'})
+        if file.size > 5 * 1024 * 1024:
+            return JsonResponse({'success': False, 'message': 'File must be smaller than 5 MB'})
+
+        content = ai.read_pdf(file)
+        if len(content) < 50:
+            return JsonResponse({'success': False, 'message': 'Could not read text from this PDF'})
+        result = ai.review_document(tool, content, job, profile)
+
+    elif tool == 'interview':
+        skills = [us.skill.name for us in models.get_user_skills(user.id)]
+        content = f"{job['title']} - {job['company']}"
+        result = ai.interview_questions(job, profile, skills)
+
+    else:
+        return JsonResponse({'success': False, 'message': 'Unknown tool'})
+
+    if not result:
+        return JsonResponse({'success': False, 'message': 'AI is busy, please try again'})
+
+    # Save the result in AIReview
+    models.AIReview.objects.create(
+        user=user,
+        review_type=tool,
+        content=content,
+        result=result,
+    )
+    return JsonResponse({'success': True, 'result': result})
+
+
+
+

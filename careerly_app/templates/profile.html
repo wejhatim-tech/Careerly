@@ -256,7 +256,7 @@
                         {% for user_skill in skills %}
                             <div class="skill-item" data-skill-id="{{ user_skill.skill.id }}">
                                 <span>{{ user_skill.skill.name }}</span>
-                                <button type="submit" class="skill-remove">×</button>
+                                <button type="button" class="skill-remove">×</button>
                             </div>
                         {% empty %}
                             <p class="no-skills" id="no-skills">No skills added yet.</p>
