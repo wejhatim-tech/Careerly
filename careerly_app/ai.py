@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+from pypdf import PdfReader
 from dotenv import load_dotenv
 from google import genai
 
@@ -20,8 +21,10 @@ def ask_ai(prompt):
     try:
         response = client.models.generate_content(model=MODEL, contents=prompt)
         return response.text
-    except Exception:
+    except Exception as e:
+        print('Gemini error:', e)
         return None
+        
 
 
 # Turn the AI text answer into a Python list / dict
@@ -103,7 +106,7 @@ def get_job(job_id):
         return clean_job(jobs[0]) if jobs else None
     except Exception:
         return None
-        
+
 
 # Ask Gemini to pick the best 5 jobs for this profile
 def match_jobs(profile, skills, jobs):
@@ -145,3 +148,55 @@ match must be one of: Excellent, Good, Possible.
             job['reason'] = item.get('reason', '')
             best.append(job)
     return best        
+
+# Read the text from an uploaded PDF file
+def read_pdf(file):
+    try:
+        reader = PdfReader(file)
+        return '\n'.join(page.extract_text() or '' for page in reader.pages).strip()
+    except Exception:
+        return ''
+
+
+# AI feedback on a CV or cover letter for a specific job
+def review_document(doc_type, text, job, profile):
+    name = 'CV' if doc_type == 'cv' else 'cover letter'
+    prompt = f"""
+You are a career coach. Review this candidate's {name} for the job below.
+
+Job title: {job['title']}
+Company: {job['company']}
+Job description:
+{job['description'][:3000]}
+
+Candidate level: {profile.career_level if profile else 'not given'}
+
+The {name}:
+{text[:6000]}
+
+Answer in English with these sections, short bullet points, no markdown symbols like ** or #:
+Strengths:
+Missing for this job:
+How to improve:
+"""
+    return ask_ai(prompt)
+
+
+# AI interview questions for a specific job
+def interview_questions(job, profile, skills):
+    prompt = f"""
+You are an interviewer for this job.
+
+Job title: {job['title']}
+Company: {job['company']}
+Job description:
+{job['description'][:3000]}
+
+Candidate level: {profile.career_level if profile else 'not given'}
+Candidate skills: {', '.join(skills) if skills else 'not given'}
+
+Write 8 interview questions for this candidate: 3 technical, 3 behavioral, 2 about the company or role.
+For each question add one short tip on how to answer.
+Answer in English, numbered list, no markdown symbols like ** or #.
+"""
+    return ask_ai(prompt)    

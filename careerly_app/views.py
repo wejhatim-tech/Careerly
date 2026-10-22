@@ -3,6 +3,7 @@ from django.contrib import messages
 from . import models
 from django.db.models import Q
 from django.http import JsonResponse
+from . import ai
 
 
 def index(request):
@@ -274,3 +275,87 @@ def remove_skill(request, skill_id):
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': False}, status=400)
+
+def job_details(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+    if user.role == 'admin':
+        return redirect('/admin-dashboard')
+
+    # Jobs are saved in the session by Find My Best Jobs
+    job_id = request.GET.get('id', '')
+    jobs = request.session.get('jobs', [])
+    job = next((j for j in jobs if j['job_id'] == job_id), None)
+
+
+    if not job:
+        messages.error(request, 'Job not found, please search again')
+        return redirect('/dashboard')
+
+    context = {
+        'user': user,
+        'job': job,
+    }
+    return render(request, 'job_details.html', context)
+
+
+def job_ai(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return JsonResponse({'success': False, 'message': 'Please log in first'}, status=401)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False}, status=400)
+
+    user = models.get_user_by_id(request.session['user_id'])
+    tool = request.POST.get('tool', '')
+    job_id = request.POST.get('job_id', '')
+
+    # Find the job saved in the session
+    jobs = request.session.get('jobs', [])
+    job = next((j for j in jobs if j['job_id'] == job_id), None)
+    if not job:
+        return JsonResponse({'success': False, 'message': 'Job not found, please search again'})
+
+    profile = models.get_profile_by_user(user.id)
+
+    if tool in ['cv', 'cover_letter']:
+        file = request.FILES.get('file')
+        if not file:
+            return JsonResponse({'success': False, 'message': 'Please upload a PDF file'})
+        if not file.name.lower().endswith('.pdf'):
+            return JsonResponse({'success': False, 'message': 'Only PDF files are allowed'})
+        if file.size > 5 * 1024 * 1024:
+            return JsonResponse({'success': False, 'message': 'File must be smaller than 5 MB'})
+
+        content = ai.read_pdf(file)
+        if len(content) < 50:
+            return JsonResponse({'success': False, 'message': 'Could not read text from this PDF'})
+        result = ai.review_document(tool, content, job, profile)
+
+    elif tool == 'interview':
+        skills = [us.skill.name for us in models.get_user_skills(user.id)]
+        content = f"{job['title']} - {job['company']}"
+        result = ai.interview_questions(job, profile, skills)
+
+    else:
+        return JsonResponse({'success': False, 'message': 'Unknown tool'})
+
+    if not result:
+        return JsonResponse({'success': False, 'message': 'AI is busy, please try again'})
+
+    # Save the result in AIReview
+    models.AIReview.objects.create(
+        user=user,
+        review_type=tool,
+        content=content,
+        result=result,
+    )
+    return JsonResponse({'success': True, 'result': result})
+
+
+
+

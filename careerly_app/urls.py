@@ -17,4 +17,7 @@ urlpatterns = [
     path('profile/edit', views.edit_profile),
     path('profile/skill/add', views.add_skill),
     path('profile/skill/<int:skill_id>/remove', views.remove_skill),
+    path('job', views.job_details),
+    path('job/ai', views.job_ai),
+
 ]
