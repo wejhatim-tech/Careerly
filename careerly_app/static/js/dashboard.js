@@ -136,3 +136,21 @@ function getCookie(name) {
 
     return cookieValue;
 }
+
+const viewAllApplicationsBtn = document.getElementById('view-all-applications');
+
+if (viewAllApplicationsBtn) {
+    viewAllApplicationsBtn.addEventListener('click', function() {
+        const extraApplications = document.querySelectorAll('.extra-application');
+
+        extraApplications.forEach(function(application) {
+            application.classList.toggle('d-none');
+        });
+
+        if (viewAllApplicationsBtn.textContent.trim() === 'View All Applications') {
+            viewAllApplicationsBtn.textContent = 'Show Less';
+        } else {
+            viewAllApplicationsBtn.textContent = 'View All Applications';
+        }
+    });
+}

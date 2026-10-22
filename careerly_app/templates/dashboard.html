@@ -124,22 +124,29 @@
 
                             <tbody>
                                 {% for application in applications %}
-                                    <tr>
-                                        <td>{{ application.job_title }}</td>
-                                        <td>{{ application.company }}</td>
-                                        <td>
-                                            <span class="application-status">
-                                                {{ application.status|title }}
-                                            </span>
-                                        </td>
-                                        <td>{{ application.created_at|date:"M d, Y" }}</td>
-                                        <td>
-                                            <a href="#" class="application-view">View</a>
-                                        </td>
-                                    </tr>
+                                <tr {% if forloop.counter > 5 %}class="extra-application d-none"{% endif %}>
+                                    <td>{{ application.job_title }}</td>
+                                    <td>{{ application.company }}</td>
+                                    <td>
+                                        <span class="application-status">
+                                        {{ application.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ application.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="#" class="application-view">View</a>
+                                    </td>
+                                </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
+                        {% if applications|length > 5 %}
+                        <div class="text-center mt-3">
+                            <button type="button" id="view-all-applications" class="btn details-btn">
+                                View All Applications
+                            </button>
+                        </div>
+                        {% endif %}
                     </div>
                 {% else %}
                     <div class="dashboard-empty">
