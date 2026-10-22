@@ -54,6 +54,23 @@ def clean_job(job):
         'apply_link': job.get('job_apply_link'),
     }
 
+# Country codes for the user's preferred location
+COUNTRY_CODES = {
+    'palestine': 'ps', 'jordan': 'jo', 'amman': 'jo',
+    'saudi': 'sa', 'riyadh': 'sa', 'uae': 'ae', 'dubai': 'ae',
+    'qatar': 'qa', 'kuwait': 'kw', 'egypt': 'eg',
+    'usa': 'us', 'uk': 'gb', 'germany': 'de', 'canada': 'ca',
+}
+
+
+def get_country_code(location):
+    location = (location or '').lower()
+    for name, code in COUNTRY_CODES.items():
+        if name in location:
+            return code
+    return 'jo'
+
+
 
 # Search live jobs from Google for Jobs (JSearch API)
 def search_jobs(query, country='jo', num=10):
@@ -86,6 +103,7 @@ def get_job(job_id):
         return clean_job(jobs[0]) if jobs else None
     except Exception:
         return None
+        
 
 # Ask Gemini to pick the best 5 jobs for this profile
 def match_jobs(profile, skills, jobs):
@@ -94,7 +112,7 @@ def match_jobs(profile, skills, jobs):
 
     short_jobs = [
         {'index': i, 'title': j['title'], 'company': j['company'],
-         'location': j['location'], 'description': j['description'][:600]}
+        'location': j['location'], 'description': j['description'][:600]}
         for i, j in enumerate(jobs)
     ]
     prompt = f"""
