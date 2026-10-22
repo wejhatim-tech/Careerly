@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from . import models
 from django.db.models import Q
+from django.http import JsonResponse
 
 
 def index(request):
@@ -85,11 +86,11 @@ def admin_dashboard(request):
         return redirect('/login')
 
     admin = models.User.objects.get(id=request.session['user_id'])
-    # اليوزر العادي ما بيفوت هون
+    # Normal users cannot access this page
     if admin.role != 'admin':
         return redirect('/dashboard')
 
-    # البحث بالاسم أو الإيميل
+    # Search by name or email
     search = request.GET.get('search', '')
     users = models.User.objects.all().order_by('-created_at')
     if search:
@@ -160,3 +161,113 @@ def admin_message(request, id):
         'msg': models.ContactMessage.objects.get(id=id),
     }
     return render(request, 'admin_message.html', context)
+
+
+def logout(request):
+    request.session.flush()
+    return redirect('/')
+
+def profile(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+    profile = models.get_profile_by_user(user.id)
+    skills = models.get_user_skills(user.id)
+    edit_mode = request.GET.get('edit') == 'true'
+
+    context = {
+        'user': user,
+        'profile': profile,
+        'skills': skills,
+        'edit_mode': edit_mode
+    }
+
+    return render(request, 'profile.html', context)
+
+
+def create_profile(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+
+    # Prevent creating more than one profile
+    if models.get_profile_by_user(user.id):
+        return redirect('/profile')
+
+    if request.method == 'POST':
+        errors = models.Profile.objects.profile_validation(request.POST)
+
+        if errors:
+            for value in errors.values():
+                messages.error(request, value)
+            return redirect('/profile')
+
+        models.create_profile(user, request.POST)
+        return redirect('/profile')
+
+    return redirect('/profile')
+
+
+def edit_profile(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+    profile = models.get_profile_by_user(user.id)
+
+    if not profile:
+        return redirect('/profile')
+
+    if request.method == 'POST':
+        errors = models.Profile.objects.profile_validation(request.POST)
+
+        if errors:
+            for value in errors.values():
+                messages.error(request, value)
+            return redirect('/profile?edit=true')
+
+        models.update_profile(profile, request.POST)
+        return redirect('/profile')
+
+    return redirect('/profile?edit=true')
+
+
+def add_skill(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return JsonResponse({'success': False, 'message': 'Please log in first'}, status=401)
+
+    if request.method == 'POST':
+        skill_name = request.POST.get('skill', '').strip()
+
+        if not skill_name:
+            return JsonResponse({'success': False, 'message': 'Skill is required'})
+
+        user = models.get_user_by_id(request.session['user_id'])
+        skill = models.add_user_skill(user, skill_name)
+
+        return JsonResponse({
+            'success': True,
+            'skill_id': skill.id,
+            'skill_name': skill.name
+        })
+
+    return JsonResponse({'success': False}, status=400)
+
+
+def remove_skill(request, skill_id):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return JsonResponse({'success': False}, status=401)
+
+    if request.method == 'POST':
+        models.remove_user_skill(request.session['user_id'], skill_id)
+
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False}, status=400)

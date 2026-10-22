@@ -11,4 +11,10 @@ urlpatterns = [
     path('admin-dashboard/user/<int:id>', views.admin_user),
     path('admin-dashboard/user/<int:id>/status', views.toggle_user_status),
     path('admin-dashboard/message/<int:id>', views.admin_message),
+    path('logout', views.logout),
+    path('profile', views.profile),
+    path('profile/create', views.create_profile),
+    path('profile/edit', views.edit_profile),
+    path('profile/skill/add', views.add_skill),
+    path('profile/skill/<int:skill_id>/remove', views.remove_skill),
 ]
