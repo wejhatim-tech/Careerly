@@ -50,7 +50,15 @@
 
                 <div class="job-actions">
                     <a href="{{ job.apply_link }}" target="_blank" rel="noopener" class="btn save-profile-btn">Apply on company site</a>
-                    <!-- I Applied button (Khawla) -->
+                    <form action="/job/apply" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="job_id" value="{{ job.job_id }}">
+                        {% if applied %}
+                        <button type="button" class="btn job-applied-btn done" disabled>Applied ✓</button>
+                        {% else %}
+                        <button type="submit" class="btn job-applied-btn">I Applied</button>
+                        {% endif %}
+                    </form>
                 </div>
             </div>
 

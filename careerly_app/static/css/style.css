@@ -1609,3 +1609,25 @@ body {
         font-size: 12px;
     }
 }
+
+/* I Applied button, same size as Apply */
+.job-applied-btn {
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    background: transparent;
+    vertical-align: middle;
+}
+
+.job-applied-btn:hover {
+    background: var(--primary);
+    color: #fff;
+}
+
+.job-applied-btn.done {
+    border-color: #2e7d32;
+    color: #2e7d32;
+    opacity: 1;
+}

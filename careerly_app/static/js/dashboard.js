@@ -154,3 +154,13 @@ if (viewAllApplicationsBtn) {
         }
     });
 }
+
+// Show the last searched jobs when the page opens
+const savedJobsData = document.getElementById('saved-jobs');
+
+if (savedJobsData) {
+    const savedJobs = JSON.parse(savedJobsData.textContent);
+    if (savedJobs.length) {
+        displayJobs(savedJobs);
+    }
+}
