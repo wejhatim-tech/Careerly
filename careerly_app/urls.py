@@ -22,4 +22,5 @@ urlpatterns = [
     path('dashboard', views.dashboard),
     path('dashboard/find-jobs', views.find_jobs),
     path('job/apply', views.apply_job),
+    path('application/<int:id>', views.application_details),
 ]

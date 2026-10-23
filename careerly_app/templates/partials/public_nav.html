@@ -11,9 +11,9 @@
 
         <div class="collapse navbar-collapse" id="publicNavbar">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
-                <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="/about">About</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.path == '/contact' %}active{% endif %}" href="/contact">Contact</a></li>
                 <li class="nav-item"><a class="nav-link login-link" href="/login">Log In</a></li>
                 <li class="nav-item"><a class="btn get-started-btn" href="/register">Get Started</a></li>
             </ul>

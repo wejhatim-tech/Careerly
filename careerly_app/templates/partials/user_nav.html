@@ -9,8 +9,8 @@
         </button>
         <div class="collapse navbar-collapse" id="userNavbar">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.path == '/dashboard' %}active{% endif %}" href="/dashboard">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.path == '/profile' %}active{% endif %}" href="/profile">Profile</a></li>
                 <li class="nav-item"><a class="nav-link logout-link" href="/logout">Logout</a></li>
             </ul>
         </div>
