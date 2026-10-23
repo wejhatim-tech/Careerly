@@ -298,6 +298,7 @@ def job_details(request):
     context = {
         'user': user,
         'job': job,
+        'applied': models.has_applied(user.id, job['apply_link']),
     }
     return render(request, 'job_details.html', context)
 
@@ -381,7 +382,8 @@ def dashboard(request):
         'user': user,
         'profile': profile,
         'skills': skills,
-        'applications': applications
+        'applications': applications,
+        'saved_jobs': request.session.get('jobs', []),
     }
 
     return render(request, 'dashboard.html', context)
@@ -448,3 +450,29 @@ def find_jobs(request):
         'success': True,
         'jobs': matched_jobs
     })
+
+def apply_job(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    if request.method != 'POST':
+        return redirect('/dashboard')
+
+    user = models.get_user_by_id(request.session['user_id'])
+    job_id = request.POST.get('job_id', '')
+    jobs = request.session.get('jobs', [])
+    job = next((j for j in jobs if j['job_id'] == job_id), None)
+
+    if not job or not job['apply_link']:
+        messages.error(request, 'Job not found, please search again')
+        return redirect('/dashboard')
+
+    # Can't apply to the same job more than one time
+    if models.has_applied(user.id, job['apply_link']):
+        messages.error(request, 'You already applied to this job')
+        return redirect('/dashboard')
+
+    models.create_application(user, job)
+    messages.success(request, 'Job added to My Applications')
+    return redirect('/dashboard')    

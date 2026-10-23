@@ -235,3 +235,18 @@ def remove_user_skill(user_id, skill_id):
 # Get all applications for a user
 def get_user_applications(user_id):
     return Application.objects.filter(user_id=user_id).order_by('-created_at')
+
+def create_application(user, job):
+    # Save the job only when the user applies
+    return Application.objects.create(
+        user=user,
+        job_title=job['title'],
+        company=job['company'] or 'Unknown company',
+        location=job['location'],
+        job_url=job['apply_link'],
+        job_description=job['description'][:2000],
+    )
+
+
+def has_applied(user_id, job_url):
+    return Application.objects.filter(user_id=user_id, job_url=job_url).exists()    
