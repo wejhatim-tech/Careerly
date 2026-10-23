@@ -46,6 +46,11 @@
     color: var(--secondary);
 }
 
+.public-navbar .nav-link.active {
+    color: var(--secondary);
+    font-weight: 600;
+}
+
 .login-link {
     color: var(--primary) !important;
     font-weight: 600 !important;
@@ -91,6 +96,11 @@
 .user-navbar .nav-link:hover { 
     color:var(--secondary); 
 }
+.user-navbar .nav-link.active {
+    color: var(--secondary);
+    font-weight: 600;
+}
+
 .user-navbar .logout-link { 
     color:var(--primary); 
     font-weight:600; 

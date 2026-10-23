@@ -31,7 +31,7 @@ function startLoading() {
         }
 
         loadingText.textContent = loadingMessages[loadingMessageIndex];
-    }, 2500);
+    }, 4000);
 }
 
 function stopLoading() {

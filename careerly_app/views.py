@@ -417,13 +417,18 @@ def find_jobs(request):
 
     country = ai.get_country_code(profile.preferred_location)
 
-    query = f"{profile.target_role} in {profile.preferred_location}"
+    if profile.work_mode.lower() == 'remote':
 
-    jobs = ai.search_jobs(
-        query,
-        country=country,
-        num=10
-    )
+        query = f"{profile.target_role} remote worldwide"
+
+        jobs = ai.search_jobs(query,country='us',num=15,remote=True)
+
+    else:
+
+        query = f"{profile.target_role} in {profile.preferred_location}"
+
+        jobs = ai.search_jobs(
+        query,country=country,num=15,remote=False)
 
     if not jobs:
         return JsonResponse({
@@ -476,3 +481,41 @@ def apply_job(request):
     models.create_application(user, job)
     messages.success(request, 'Job added to My Applications')
     return redirect('/dashboard')    
+
+def application_details(request, id):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+
+    if user.role != 'user':
+        return redirect('/admin-dashboard')
+
+    application = models.Application.objects.filter(
+        id=id,
+        user=user
+    ).first()
+
+    if not application:
+        messages.error(request, 'Application not found')
+        return redirect('/dashboard')
+
+    job = {
+        'title': application.job_title,
+        'company': application.company,
+        'location': application.location,
+        'description': application.job_description,
+        'apply_link': application.job_url,
+        'match': 'Possible',
+        'reason': 'This job was saved in your applications.',
+        'job_id': ''
+    }
+
+    context = {
+        'user': user,
+        'job': job,
+        'applied': True,
+    }
+
+    return render(request, 'job_details.html', context)
