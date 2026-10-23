@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Careerly</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+</head>
+
+<body>
+    {% include 'partials/user_nav.html' %}
+
+    <main class="dashboard-page">
+        <div class="container">
+
+            <!-- Welcome Section -->
+            <section class="dashboard-welcome">
+                <div>
+                    <p class="dashboard-label">Career Dashboard</p>
+                    <h1>Welcome back, {{ user.first_name }}!</h1>
+                    <p>Find jobs that match your profile and track your applications.</p>
+                </div>
+
+                <button type="button" id="find-jobs-btn" class="btn find-jobs-btn">
+                    Find My Best Jobs
+                </button>
+            </section>
+
+            <!-- Profile Summary -->
+            <section class="dashboard-card">
+                <div class="dashboard-section-heading">
+                    <div>
+                        <h2>Your Profile</h2>
+                        <p>Careerly will use these details to find better job matches.</p>
+                    </div>
+
+                    <a href="/profile" class="dashboard-link">View Profile</a>
+                </div>
+
+                <div class="row dashboard-profile-info">
+                    <div class="col-md-3">
+                        <span>Target Role</span>
+                        <p>{{ profile.target_role }}</p>
+                    </div>
+
+                    <div class="col-md-3">
+                        <span>Career Level</span>
+                        <p>{{ profile.career_level|title }}</p>
+                    </div>
+
+                    <div class="col-md-3">
+                        <span>Location</span>
+                        <p>{{ profile.preferred_location }}</p>
+                    </div>
+
+                    <div class="col-md-3">
+                        <span>Work Mode</span>
+                        <p>{{ profile.work_mode|title }}</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-skills">
+                    <span>Skills</span>
+
+                    <div class="skills-list">
+                        {% for user_skill in skills %}
+                            <div class="skill-item">
+                                {{ user_skill.skill.name }}
+                            </div>
+                        {% empty %}
+                            <p class="no-skills">No skills added yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Job Recommendations -->
+            <section class="dashboard-card">
+                <div class="dashboard-section-heading">
+                    <div>
+                        <h2>Recommended Jobs</h2>
+                        <p>Find up to five current jobs based on your profile.</p>
+                    </div>
+                </div>
+
+                <div id="jobs-loading" class="jobs-loading d-none">
+                    <div class="loading-spinner"></div>
+                    <p id="loading-text">Reading your career profile...</p>
+                </div>
+
+                <div id="jobs-results">
+                    <div class="dashboard-empty">
+                        <h3>No job recommendations yet</h3>
+                        <p>Click “Find My Best Jobs” to search for suitable opportunities.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Applications -->
+            <section class="dashboard-card">
+                <div class="dashboard-section-heading">
+                    <div>
+                        <h2>My Applications</h2>
+                        <p>Track the jobs you have applied for.</p>
+                    </div>
+                </div>
+
+                {% if applications %}
+                    <div class="table-responsive">
+                        <table class="table application-table">
+                            <thead>
+                                <tr>
+                                    <th>Job</th>
+                                    <th>Company</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for application in applications %}
+                                <tr {% if forloop.counter > 5 %}class="extra-application d-none"{% endif %}>
+                                    <td>{{ application.job_title }}</td>
+                                    <td>{{ application.company }}</td>
+                                    <td>
+                                        <span class="application-status">
+                                        {{ application.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ application.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="#" class="application-view">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% if applications|length > 5 %}
+                        <div class="text-center mt-3">
+                            <button type="button" id="view-all-applications" class="btn details-btn">
+                                View All Applications
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="dashboard-empty">
+                        <h3>No applications yet</h3>
+                        <p>Jobs you mark as applied will appear here.</p>
+                    </div>
+                {% endif %}
+            </section>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>

@@ -19,5 +19,6 @@ urlpatterns = [
     path('profile/skill/<int:skill_id>/remove', views.remove_skill),
     path('job', views.job_details),
     path('job/ai', views.job_ai),
-
+    path('dashboard', views.dashboard),
+    path('dashboard/find-jobs', views.find_jobs),
 ]

@@ -357,5 +357,94 @@ def job_ai(request):
     return JsonResponse({'success': True, 'result': result})
 
 
+def dashboard(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+
+    # Prevent admin from accessing user dashboard
+    if user.role != 'user':
+        return redirect('/admin-dashboard')
+
+    profile = models.get_profile_by_user(user.id)
+
+    # User must complete profile first
+    if not profile:
+        return redirect('/profile')
+
+    skills = models.get_user_skills(user.id)
+    applications = models.get_user_applications(user.id)
+
+    context = {
+        'user': user,
+        'profile': profile,
+        'skills': skills,
+        'applications': applications
+    }
+
+    return render(request, 'dashboard.html', context)
 
 
+def find_jobs(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return JsonResponse({'success': False, 'message': 'Please log in first'}, status=401)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False}, status=400)
+
+    user = models.get_user_by_id(request.session['user_id'])
+
+    if user.role != 'user':
+        return JsonResponse({'success': False}, status=403)
+
+    profile = models.get_profile_by_user(user.id)
+
+    if not profile:
+        return JsonResponse({
+            'success': False,
+            'message': 'Please complete your profile first'
+        })
+
+    skills = [
+        user_skill.skill.name
+        for user_skill in models.get_user_skills(user.id)
+    ]
+
+    country = ai.get_country_code(profile.preferred_location)
+
+    query = f"{profile.target_role} in {profile.preferred_location}"
+
+    jobs = ai.search_jobs(
+        query,
+        country=country,
+        num=10
+    )
+
+    if not jobs:
+        return JsonResponse({
+            'success': False,
+            'message': 'No jobs found. Please try again.'
+        })
+
+    matched_jobs = ai.match_jobs(
+        profile,
+        skills,
+        jobs
+    )
+
+    if not matched_jobs:
+        return JsonResponse({
+            'success': False,
+            'message': 'Could not find suitable matches. Please try again.'
+        })
+
+    # Save jobs in session for Job Details page
+    request.session['jobs'] = matched_jobs
+
+    return JsonResponse({
+        'success': True,
+        'jobs': matched_jobs
+    })
