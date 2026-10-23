@@ -50,7 +50,7 @@ def clean_job(job):
         'job_id': job.get('job_id'),
         'title': job.get('job_title'),
         'company': job.get('employer_name'),
-        'location': ', '.join(part for part in [city, country] if part),
+                'location': job.get('job_location') or ', '.join(part for part in [city, country] if part),
         'employment_type': job.get('job_employment_type'),
         'is_remote': job.get('job_is_remote'),
         'description': job.get('job_description') or '',
@@ -79,22 +79,15 @@ def get_country_code(location):
 def search_jobs(query, country='jo', num=10):
     try:
         response = requests.get(
-            f'{JSEARCH_URL}/search',
+            f'{JSEARCH_URL}/search-v2',
             headers=JSEARCH_HEADERS,
-            params={
-                'query': query,
-                'num_pages': 1,
-                'country': country
-            },
+            params={'query': query, 'num_pages': 1, 'country': country},
             timeout=20,
         )
-
         response.raise_for_status()
-
-        data = response.json().get('data', [])
-
-        return [clean_job(job) for job in data[:num]]
-
+        data = response.json().get('data', {})
+        jobs = data.get('jobs', []) if isinstance(data, dict) else data
+        return [clean_job(job) for job in jobs[:num]]
     except Exception as e:
         print('JSearch error:', e)
         return []
