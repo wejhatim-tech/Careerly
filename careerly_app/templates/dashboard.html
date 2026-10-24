@@ -34,88 +34,6 @@
                 </button>
             </section>
 
-            <!-- Profile Summary -->
-            <section class="dashboard-card">
-                <div class="dashboard-section-heading">
-                    <div>
-                        <h2>Your Profile</h2>
-                        <p>Careerly will use these details to find better job matches.</p>
-                    </div>
-
-                    <a href="/profile" class="dashboard-link">View Profile</a>
-                </div>
-
-                <div class="row dashboard-profile-info">
-                    <div class="col-md-3">
-                        <span>Target Role</span>
-                        <p>{{ profile.target_role }}</p>
-                    </div>
-
-                    <div class="col-md-3">
-                        <span>Career Level</span>
-                        <p>{{ profile.career_level|title }}</p>
-                    </div>
-
-                    <div class="col-md-3">
-                        <span>Location</span>
-                        <p>{{ profile.preferred_location }}</p>
-                    </div>
-
-                    <div class="col-md-3">
-                        <span>Work Mode</span>
-                        <p>{{ profile.work_mode_list|join:", "|title }}</p>
-                    </div>
-                </div>
-
-                <div class="dashboard-skills">
-                    <span>Skills</span>
-
-                    <div class="skills-list">
-                        {% for user_skill in skills %}
-                            <div class="skill-item">
-                                {{ user_skill.skill.name }}
-                            </div>
-                        {% empty %}
-                            <p class="no-skills">No skills added yet.</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </section>
-            <!-- My Favourites -->
-            <section class="dashboard-card">
-                <div class="dashboard-section-heading">
-                    <h3>My Favourites</h3>
-                </div>
-            {% for fav in favorites %}
-            <a href="/favorite/{{ fav.id }}" class="favorite-item">
-            <strong>{{ fav.job_title }}</strong>
-            <span>{{ fav.company }}{% if fav.location %} • {{ fav.location }}{% endif %}</span>
-            </a>
-            {% empty %}
-            <p class="no-skills">No saved jobs yet.</p>
-            {% endfor %}
-            </section>
-            <!-- Search History -->
-<section class="dashboard-card">
-    <div class="dashboard-section-heading">
-        <h2>Search History</h2>
-        {% if searches %}
-            <form action="/history/clear" method="post">
-            {% csrf_token %}
-            <button type="submit" class="history-clear-btn">Clear history</button>
-                </form>
-            {% endif %}
-    </div>
-
-    {% for search in searches %}
-        <a href="/history/{{ search.id }}" class="favorite-item">
-            <strong>{{ search.query }}</strong>
-            <span>{{ search.results_count }} jobs • {{ search.created_at|date:"d M Y, H:i" }}</span>
-        </a>
-    {% empty %}
-        <p class="no-skills">No searches yet.</p>
-    {% endfor %}
-</section>
             <!-- AI Job Recommendations -->
             <section class="dashboard-card">
                 <div class="dashboard-section-heading">
@@ -166,14 +84,45 @@
                                     <td>{{ application.job_title }}</td>
                                     <td>{{ application.company }}</td>
                                     <td>
-                                        <span class="application-status">
-                                        {{ application.status|title }}
-                                        </span>
-                                    </td>
+    <form action="/application/{{ application.id }}/status" method="POST">
+        {% csrf_token %}
+
+        <select name="status" class="application-status-select" onchange="this.form.submit()">
+
+            <option value="applied" {% if application.status == 'applied' %}selected{% endif %}>
+                Applied
+            </option>
+
+            <option value="interview" {% if application.status == 'interview' %}selected{% endif %}>
+                Interview
+            </option>
+
+            <option value="accepted" {% if application.status == 'accepted' %}selected{% endif %}>
+                Accepted
+            </option>
+
+            <option value="rejected" {% if application.status == 'rejected' %}selected{% endif %}>
+                Rejected
+            </option>
+
+        </select>
+    </form>
+</td>
                                     <td>{{ application.created_at|date:"M d, Y" }}</td>
                                     <td>
-                                        <a href="/application/{{ application.id }}" class="application-view">View</a>
-                                    </td>
+    <div class="application-actions">
+        <a href="/application/{{ application.id }}" class="application-view">
+            View
+        </a>
+
+        <form action="/application/{{ application.id }}/remove" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="application-remove">
+                Remove
+            </button>
+        </form>
+    </div>
+</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

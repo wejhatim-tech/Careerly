@@ -51,8 +51,6 @@ def ask_ai(prompt):
     except Exception as e:
         print('Backup Gemini error:', e)
         return None
-        
-
 
 # Turn the AI text answer into a Python list / dict
 def parse_json(text):
@@ -456,4 +454,4 @@ Write 8 interview questions for this candidate: 3 technical, 3 behavioral, 2 abo
 For each question add one short tip on how to answer.
 Answer in English, numbered list, no markdown symbols like ** or #.
 """
-    return ask_ai(prompt)    
+    return ask_ai(prompt)
