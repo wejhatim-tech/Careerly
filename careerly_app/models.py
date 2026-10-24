@@ -305,4 +305,4 @@ class SearchHistory(models.Model): # One to Many Relation
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user} - {self.query}"    
+        return f"{self.user} - {self.query}" 

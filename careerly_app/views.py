@@ -386,12 +386,27 @@ def dashboard(request):
         'skills': skills,
         'applications': applications,
         'saved_jobs': request.session.get('jobs', []),
-        'favorites': models.get_user_favorites(user.id),
-        'searches': models.SearchHistory.objects.filter(user=user).order_by('-created_at')[:5],
     }
 
     return render(request, 'dashboard.html', context)
 
+def saved_jobs(request):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+
+    if user.role != 'user':
+        return redirect('/admin-dashboard')
+
+    favorites = models.get_user_favorites(user.id)
+
+    context = {
+        'user': user,
+        'favorites': favorites,
+    }
+
+    return render(request, 'saved_jobs.html', context)
 
 def find_jobs(request):
     # Check if user is logged in
@@ -526,6 +541,62 @@ def application_details(request, id):
 
     return render(request, 'job_details.html', context)
 
+def remove_application(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    if request.method != 'POST':
+        return redirect('/dashboard')
+
+    user = models.get_user_by_id(request.session['user_id'])
+
+    application = models.Application.objects.filter(
+        id=id,
+        user=user
+    ).first()
+
+    if not application:
+        messages.error(request, 'Application not found')
+        return redirect('/dashboard')
+
+    application.delete()
+
+    messages.success(request, 'Application removed successfully')
+    return redirect('/dashboard')
+
+def update_application_status(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    if request.method != 'POST':
+        return redirect('/dashboard')
+
+    user = models.get_user_by_id(request.session['user_id'])
+
+    application = models.Application.objects.filter(
+        id=id,
+        user=user
+    ).first()
+
+    if not application:
+        messages.error(request, 'Application not found')
+        return redirect('/dashboard')
+
+    new_status = request.POST.get('status')
+
+    allowed_statuses = [
+        'applied',
+        'interview',
+        'accepted',
+        'rejected',
+    ]
+
+    if new_status in allowed_statuses:
+        application.status = new_status
+        application.save()
+
+    return redirect('/dashboard')
+
 def favorite_job(request):
     # Check if user is logged in
     if 'user_id' not in request.session:
@@ -583,18 +654,53 @@ def remove_favorite(request, id):
 
     if request.method == 'POST':
         models.Favorite.objects.filter(id=id, user_id=request.session['user_id']).delete()
-    return redirect('/dashboard')    
+    return redirect('/favorites')  
 
-def open_search(request, id):
-    # Check if user is logged in
+def search_history(request):
     if 'user_id' not in request.session:
         return redirect('/login')
 
-    search = models.SearchHistory.objects.filter(id=id, user_id=request.session['user_id']).first()
-    if search:
-        # Show the old results again on the dashboard
-        request.session['jobs'] = search.results
-    return redirect('/dashboard')    
+    user = models.get_user_by_id(request.session['user_id'])
+
+    if user.role != 'user':
+        return redirect('/admin-dashboard')
+
+    searches = models.SearchHistory.objects.filter(
+        user=user
+    ).order_by('-created_at')
+
+    context = {
+        'user': user,
+        'searches': searches,
+    }
+
+    return render(request, 'search_history.html', context)
+
+def open_search(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+
+    search = models.SearchHistory.objects.filter(
+        id=id,
+        user=user
+    ).first()
+
+    if not search:
+        messages.error(request, 'Search not found')
+        return redirect('/history')
+
+    # Keep old results available for Job Details
+    request.session['jobs'] = search.results
+
+    context = {
+        'user': user,
+        'search': search,
+        'jobs': search.results,
+    }
+
+    return render(request, 'search_results.html', context)  
 
 def clear_history(request):
     # Check if user is logged in
@@ -603,4 +709,4 @@ def clear_history(request):
 
     if request.method == 'POST':
         models.SearchHistory.objects.filter(user_id=request.session['user_id']).delete()
-    return redirect('/dashboard')
+    return redirect('/history')
