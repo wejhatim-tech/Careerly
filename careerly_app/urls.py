@@ -23,4 +23,9 @@ urlpatterns = [
     path('dashboard/find-jobs', views.find_jobs),
     path('job/apply', views.apply_job),
     path('application/<int:id>', views.application_details),
+    path('job/favorite', views.favorite_job),
+    path('favorite/<int:id>', views.favorite_details),
+    path('favorite/<int:id>/remove', views.remove_favorite),
+    path('history/<int:id>', views.open_search),
+    path('history/clear', views.clear_history),
 ]

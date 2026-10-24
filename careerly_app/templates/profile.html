@@ -72,23 +72,44 @@
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">Work Mode</label>
-                                <select name="work_mode" class="form-select careerly-input">
-                                    <option value="">Select work mode</option>
-                                    <option value="remote">Remote</option>
-                                    <option value="hybrid">Hybrid</option>
-                                    <option value="onsite">On-site</option>
-                                </select>
+                                <div class="check-group">
+                                    <label class="check-option">
+                                        <input type="checkbox" name="work_mode" value="remote" {% if 'remote' in profile.work_mode_list %}checked{% endif %}>
+                                            Remote
+                                    </label>
+                                    <label class="check-option">
+                                        <input type="checkbox" name="work_mode" value="hybrid" {% if 'hybrid' in profile.work_mode_list %}checked{% endif %}>
+                                            Hybrid
+                                    </label>
+                                    <label class="check-option">
+                                    <input type="checkbox" name="work_mode" value="onsite" {% if 'onsite' in profile.work_mode_list %}checked{% endif %}>
+                                        On-site
+                                    </label>
+                                </div>
                             </div>
-
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">Employment Type</label>
-                                <select name="employment_type" class="form-select careerly-input">
-                                    <option value="">Select employment type</option>
-                                    <option value="full_time">Full-time</option>
-                                    <option value="part_time">Part-time</option>
-                                    <option value="internship">Internship</option>
-                                    <option value="contract">Contract</option>
-                                </select>
+                                <details class="check-dropdown">
+                                    <summary>Select employment type</summary>
+                                <div class="check-group">
+                                    <label class="check-option">
+                                        <input type="checkbox" name="employment_type" value="full_time" {% if 'full_time' in profile.employment_type_list %}checked{% endif %}>
+                                        Full-time
+                                        </label>
+                                    <label class="check-option">
+                                        <input type="checkbox" name="employment_type" value="part_time" {% if 'part_time' in profile.employment_type_list %}checked{% endif %}>
+                                        Part-time
+                                        </label>
+                                    <label class="check-option">
+                                        <input type="checkbox" name="employment_type" value="internship" {% if 'internship' in profile.employment_type_list %}checked{% endif %}>
+                                        Internship
+                                    </label>
+                                    <label class="check-option">
+                                        <input type="checkbox" name="employment_type" value="contract" {% if 'contract' in profile.employment_type_list %}checked{% endif %}>
+                                        Contract
+                                    </label>
+                                </div>
+                                </details>
                             </div>
                         </div>
                         <div class="mb-4">
@@ -148,21 +169,48 @@
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">Work Mode</label>
-                                <select name="work_mode" class="form-select careerly-input">
-                                    <option value="remote" {% if profile.work_mode == 'remote' %}selected{% endif %}>Remote</option>
-                                    <option value="hybrid" {% if profile.work_mode == 'hybrid' %}selected{% endif %}>Hybrid</option>
-                                    <option value="onsite" {% if profile.work_mode == 'onsite' %}selected{% endif %}>On-site</option>
-                                </select>
+                                <details class="check-dropdown">
+                                    <summary>Select work mode</summary>
+                                <div class="check-group">
+                                    <label class="check-option">
+                                        <input type="checkbox" name="work_mode" value="remote" {% if 'remote' in profile.work_mode_list %}checked{% endif %}>
+                                            Remote
+                                    </label>
+                                    <label class="check-option">
+                                        <input type="checkbox" name="work_mode" value="hybrid" {% if 'hybrid' in profile.work_mode_list %}checked{% endif %}>
+                                            Hybrid
+                                    </label>
+                                    <label class="check-option">
+                                    <input type="checkbox" name="work_mode" value="onsite" {% if 'onsite' in profile.work_mode_list %}checked{% endif %}>
+                                        On-site
+                                    </label>
+                                </div>
+                                </details>
                             </div>
 
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">Employment Type</label>
-                                <select name="employment_type" class="form-select careerly-input">
-                                    <option value="full_time" {% if profile.employment_type == 'full_time' %}selected{% endif %}>Full-time</option>
-                                    <option value="part_time" {% if profile.employment_type == 'part_time' %}selected{% endif %}>Part-time</option>
-                                    <option value="internship" {% if profile.employment_type == 'internship' %}selected{% endif %}>Internship</option>
-                                    <option value="contract" {% if profile.employment_type == 'contract' %}selected{% endif %}>Contract</option>
-                                </select>
+                                <details class="check-dropdown">
+                                    <summary>Select employment type</summary>
+                                <div class="check-group">
+                                    <label class="check-option">
+                                        <input type="checkbox" name="employment_type" value="full_time" {% if 'full_time' in profile.employment_type_list %}checked{% endif %}>
+                                        Full-time
+                                        </label>
+                                    <label class="check-option">
+                                        <input type="checkbox" name="employment_type" value="part_time" {% if 'part_time' in profile.employment_type_list %}checked{% endif %}>
+                                        Part-time
+                                        </label>
+                                    <label class="check-option">
+                                        <input type="checkbox" name="employment_type" value="internship" {% if 'internship' in profile.employment_type_list %}checked{% endif %}>
+                                        Internship
+                                    </label>
+                                    <label class="check-option">
+                                        <input type="checkbox" name="employment_type" value="contract" {% if 'contract' in profile.employment_type_list %}checked{% endif %}>
+                                        Contract
+                                    </label>
+                                </div>
+                                </details>
                             </div>
                         </div>
                         <div class="mb-4">
@@ -231,12 +279,12 @@
 
                         <div class="col-md-4">
                             <span>Work Mode</span>
-                            <p>{{ profile.work_mode|title }}</p>
+                            <p>{% for mode in profile.work_mode_list %}{{ mode|title }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
                         </div>
 
                         <div class="col-md-4">
                             <span>Employment Type</span>
-                            <p>{{ profile.employment_type|title }}</p>
+                            <p>{% for type in profile.employment_type_list %}{{ type|cut:"_"|title }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
                         </div>
                     </div>
                 </div>

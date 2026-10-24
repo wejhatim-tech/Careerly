@@ -19,7 +19,7 @@
 
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-danger">{{ message }}</div>
+                    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
 
@@ -33,7 +33,27 @@
                         <h1>{{ job.title }}</h1>
                         <p class="job-company">{{ job.company }}</p>
                     </div>
-                    <span class="job-match match-{{ job.match|lower }}">{{ job.match }} Match</span>
+                    <div class="job-header-side">
+                        <div class="job-header-top">
+                        {% if job.job_id %}
+                        <form action="/job/favorite" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="job_id" value="{{ job.job_id }}">
+                        <button type="submit" class="job-heart-btn {% if favorite %}is-saved{% endif %}" title="Save to favourites">
+                        {% if favorite %}❤️{% else %}🤍{% endif %}
+                        </button>
+                    </form>
+                        {% endif %}
+                        {% if favorite_id %}
+                        <form action="/favorite/{{ favorite_id }}/remove" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="job-heart-btn" title="Remove from favourites">❤️</button>
+                        </form>
+                        {% endif %}
+                        <span class="job-match match-{{ job.match|lower }}">{{ job.match }} Match</span>
+                        </div>
+                        <a href="{{ job.apply_link }}" target="_blank" rel="noopener" class="btn save-profile-btn job-apply-btn">Apply on company site</a>
+                    </div>
                 </div>
 
                 <div class="job-tags">
@@ -49,7 +69,6 @@
                 {% endif %}
 
                 <div class="job-actions">
-                    <a href="{{ job.apply_link }}" target="_blank" rel="noopener" class="btn save-profile-btn">Apply on company site</a>
                     <form action="/job/apply" method="post" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="job_id" value="{{ job.job_id }}">
@@ -59,6 +78,7 @@
                         <button type="submit" class="btn job-applied-btn">I Applied</button>
                         {% endif %}
                     </form>
+                    
                 </div>
             </div>
 

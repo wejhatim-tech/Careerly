@@ -506,17 +506,7 @@ body {
     margin-bottom: 20px;
 }
 
-.profile-details span {
-    display: block;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 600;
-}
 
-.profile-details p {
-    color: var(--text);
-    margin: 5px 0 0;
-}
 
 .profile-edit-btn,
 .save-profile-btn,
@@ -1630,4 +1620,245 @@ body {
     border-color: #2e7d32;
     color: #2e7d32;
     opacity: 1;
+}
+
+/* Make profile labels stand out */
+.profile-details span {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.profile-details p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--primary);
+}
+
+/* Profile and dashboard: same label and value style */
+.profile-view-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 18px;
+}
+
+.profile-card .profile-details span,
+.dashboard-card .dashboard-profile-info span,
+.dashboard-card .dashboard-skills > span {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.profile-card .profile-details p,
+.dashboard-card .dashboard-profile-info p {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #5b6b7a;
+}
+
+/* Center each value under its label */
+.profile-card .profile-details > div,
+.dashboard-card .dashboard-profile-info > div {
+    display: grid;
+    justify-content: start;
+    justify-items: center;
+}
+.profile-card .profile-details > div span,
+.dashboard-card .dashboard-profile-info > div span {
+    justify-self: start;
+}
+
+/* Job details: Apply button under the match badge */
+.job-header-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 14px;
+}
+
+/* Smooth hover and click on job buttons */
+.job-apply-btn,
+.job-applied-btn {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.job-apply-btn:hover,
+.job-applied-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(24, 53, 75, 0.2);
+}
+
+.job-apply-btn:active,
+.job-applied-btn:active {
+    transform: scale(0.96);
+    box-shadow: none;
+}
+/* Center text inside job buttons */
+.job-apply-btn,
+.job-applied-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 0 24px;
+}
+
+/* Checkbox options in profile form */
+.check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.check-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid var(--soft-blue);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.check-option:hover {
+    background-color: var(--background);
+    border-color: var(--secondary);
+}
+
+.check-option input {
+    accent-color: var(--primary);
+}
+
+/* Multi-select dropdown for profile choices */
+.check-dropdown {
+    position: relative;
+}
+
+.check-dropdown summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 14px 18px;
+    border: 1px solid var(--soft-blue);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--primary);
+}
+
+.check-dropdown summary::after {
+    content: "▾";
+    float: right;
+}
+
+.check-dropdown .check-group {
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid var(--soft-blue);
+    border-radius: 10px;
+    box-shadow: 0 8px 18px rgba(24, 53, 75, 0.12);
+}
+
+/* Dropdown options as a simple vertical list */
+.check-dropdown .check-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px;
+}
+
+.check-dropdown .check-option {
+    border: none;
+    background: none;
+    padding: 6px 10px;
+    margin: 0;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    width: 100%;
+}
+
+.check-dropdown .check-option:hover {
+    background: var(--background);
+}
+/* Favourite heart button */
+.job-heart-btn {
+    border: none;
+    background: none;
+    font-size: 1.8rem;
+    line-height: 1;
+    color: #b0bcc6;
+    cursor: pointer;
+    vertical-align: middle;
+    margin-left: 10px;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.job-heart-btn:hover {
+    transform: scale(1.2);
+    color: #e0475b;
+}
+
+.job-heart-btn.is-saved {
+    color: #e0475b;
+}
+
+/* My Favourites list */
+.favorite-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    border: 1px solid var(--soft-blue);
+    border-radius: 10px;
+    color: var(--primary);
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.favorite-item:hover {
+    background: var(--background);
+}
+
+.favorite-item span {
+    color: #5b6b7a;
+}
+/* Heart next to the match badge */
+.job-header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.job-header-top .job-heart-btn {
+    margin: 0;
+}
+
+
+/* Clear search history button */
+.history-clear-btn {
+    border: none;
+    background: none;
+    color: var(--secondary);
+    font-weight: 600;
+    padding: 0;
+    margin-bottom: 12px;
+}
+
+.history-clear-btn:hover {
+    text-decoration: underline;
 }

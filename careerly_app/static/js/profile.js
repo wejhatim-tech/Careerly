@@ -68,3 +68,11 @@ if (skillsList) {
         }
     });
 }
+// Close the dropdowns when clicking outside them
+document.addEventListener('click', function (event) {
+    document.querySelectorAll('.check-dropdown[open]').forEach(function (dropdown) {
+        if (!dropdown.contains(event.target)) {
+            dropdown.removeAttribute('open');
+        }
+    });
+});
