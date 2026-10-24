@@ -82,18 +82,38 @@
                 </div>
             </section>
             <!-- My Favourites -->
-<section class="dashboard-card">
-    <div class="dashboard-section-heading">
-        <h2>My Favourites</h2>
-    </div>
-
-    {% for fav in favorites %}
-        <a href="/favorite/{{ fav.id }}" class="favorite-item">
+            <section class="dashboard-card">
+                <div class="dashboard-section-heading">
+                    <h3>My Favourites</h3>
+                </div>
+            {% for fav in favorites %}
+            <a href="/favorite/{{ fav.id }}" class="favorite-item">
             <strong>{{ fav.job_title }}</strong>
             <span>{{ fav.company }}{% if fav.location %} • {{ fav.location }}{% endif %}</span>
+            </a>
+            {% empty %}
+            <p class="no-skills">No saved jobs yet.</p>
+            {% endfor %}
+            </section>
+            <!-- Search History -->
+<section class="dashboard-card">
+    <div class="dashboard-section-heading">
+        <h2>Search History</h2>
+        {% if searches %}
+            <form action="/history/clear" method="post">
+            {% csrf_token %}
+            <button type="submit" class="history-clear-btn">Clear history</button>
+                </form>
+            {% endif %}
+    </div>
+
+    {% for search in searches %}
+        <a href="/history/{{ search.id }}" class="favorite-item">
+            <strong>{{ search.query }}</strong>
+            <span>{{ search.results_count }} jobs • {{ search.created_at|date:"d M Y, H:i" }}</span>
         </a>
     {% empty %}
-        <p class="no-skills">No saved jobs yet.</p>
+        <p class="no-skills">No searches yet.</p>
     {% endfor %}
 </section>
             <!-- AI Job Recommendations -->

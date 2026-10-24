@@ -1847,3 +1847,18 @@ body {
 .job-header-top .job-heart-btn {
     margin: 0;
 }
+
+
+/* Clear search history button */
+.history-clear-btn {
+    border: none;
+    background: none;
+    color: var(--secondary);
+    font-weight: 600;
+    padding: 0;
+    margin-bottom: 12px;
+}
+
+.history-clear-btn:hover {
+    text-decoration: underline;
+}

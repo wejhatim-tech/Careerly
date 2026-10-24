@@ -387,6 +387,7 @@ def dashboard(request):
         'applications': applications,
         'saved_jobs': request.session.get('jobs', []),
         'favorites': models.get_user_favorites(user.id),
+        'searches': models.SearchHistory.objects.filter(user=user).order_by('-created_at')[:5],
     }
 
     return render(request, 'dashboard.html', context)
@@ -452,6 +453,8 @@ def find_jobs(request):
         })
 
     # Save jobs in session for Job Details page
+        # Save the search in the history
+    models.SearchHistory.objects.create(user=user, query=query, results_count=len(matched_jobs), results=matched_jobs)
     request.session['jobs'] = matched_jobs
 
     return JsonResponse({
@@ -581,3 +584,23 @@ def remove_favorite(request, id):
     if request.method == 'POST':
         models.Favorite.objects.filter(id=id, user_id=request.session['user_id']).delete()
     return redirect('/dashboard')    
+
+def open_search(request, id):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    search = models.SearchHistory.objects.filter(id=id, user_id=request.session['user_id']).first()
+    if search:
+        # Show the old results again on the dashboard
+        request.session['jobs'] = search.results
+    return redirect('/dashboard')    
+
+def clear_history(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    if request.method == 'POST':
+        models.SearchHistory.objects.filter(user_id=request.session['user_id']).delete()
+    return redirect('/dashboard')

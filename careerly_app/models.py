@@ -295,3 +295,14 @@ def toggle_favorite(user, job):
         job_description=job['description'][:2000],
     )
     return True    
+
+class SearchHistory(models.Model): # One to Many Relation
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='searches')
+    query = models.CharField(max_length=255)
+    results_count = models.PositiveIntegerField(default=0)
+    results = models.JSONField(default=list)   # The jobs found in this search
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.query}"    
