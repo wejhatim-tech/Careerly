@@ -365,46 +365,118 @@ body {
 /* Footer */
 .careerly-footer {
     background-color: #12293A;
-    padding: 30px 0 18px;
+    color: var(--white);
+    padding: 48px 0 22px;
 }
 
-.footer-icon {
-    width: 26px;
-    height: 26px;
+.footer-main {
+    display: flex;
+    justify-content: space-between;
+    gap: 70px;
+    padding-bottom: 35px;
+}
+
+.footer-brand-area {
+    max-width: 300px;
+}
+
+.footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--white);
+    font-size: 20px;
+    font-weight: 700;
+    text-decoration: none;
+    margin-bottom: 14px;
+}
+
+.footer-brand:hover {
+    color: var(--white);
+}
+
+.footer-brand-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--primary);
-    color: var(--white);
-    border-radius: 6px;
-    font-size: 13px;
+    width: 32px;
+    height: 32px;
+    background-color: var(--accent);
+    color: var(--primary);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .footer-text {
-    color: #C9D6E0;
-    font-size: 13px;
+    color: #AFC1CE;
+    font-size: 14px;
+    line-height: 1.6;
     margin-bottom: 0;
 }
 
-.footer-heading {
+.footer-links-area {
+    display: flex;
+    gap: 65px;
+}
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 110px;
+}
+
+.footer-column h6 {
     color: var(--white);
     font-size: 13px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 14px;
 }
 
-.footer-link {
-    display: block;
+.footer-column a {
     color: #AFC1CE;
-    font-size: 12px;
+    font-size: 13px;
     text-decoration: none;
-    margin-bottom: 2px;
+    margin-bottom: 9px;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.footer-copy {
+.footer-column a:hover {
+    color: var(--accent);
+    transform: translateX(3px);
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.footer-bottom p,
+.footer-bottom span {
     color: #8FA3B3;
-    font-size: 11px;
-    margin: 18px 0 0;
+    font-size: 12px;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .footer-main {
+        flex-direction: column;
+        gap: 35px;
+    }
+
+    .footer-links-area {
+        flex-wrap: wrap;
+        gap: 35px;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 7px;
+    }
 }
 
 /* Profile Page */
