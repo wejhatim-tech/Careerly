@@ -50,7 +50,7 @@ class ProfileManager(models.Manager):
             errors['work_mode'] = 'Please select at least one work mode'
         if not formdata.getlist('employment_type'):
             errors['employment_type'] = 'Please select at least one employment type'
-
+        return errors
 
 class ContactMessageManager(models.Manager):
     def contact_validation(self, formdata):
@@ -145,6 +145,21 @@ class Application(models.Model): # One to Many Relation
     def __str__(self):
         return f"{self.job_title} - {self.company}"
 
+class Favorite(models.Model): # One to Many Relation
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    job_title = models.CharField(max_length=200)
+    company = models.CharField(max_length=200)
+    location = models.CharField(max_length=150, null=True, blank=True)
+    job_url = models.URLField(max_length=500)
+    job_description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'job_url')   # Can't save the same job twice
+
+    def __str__(self):
+        return f"{self.job_title} - {self.company}"
 
 
 class ContactMessage(models.Model): # No user field : because any visitor can send message without having account
@@ -255,3 +270,28 @@ def create_application(user, job):
 
 def has_applied(user_id, job_url):
     return Application.objects.filter(user_id=user_id, job_url=job_url).exists()    
+
+# Get all saved jobs for a user
+def get_user_favorites(user_id):
+    return Favorite.objects.filter(user_id=user_id).order_by('-created_at')
+
+
+def is_favorite(user_id, job_url):
+    return Favorite.objects.filter(user_id=user_id, job_url=job_url).exists()
+
+
+# Save the job, or remove it if it is already saved
+def toggle_favorite(user, job):
+    favorite = Favorite.objects.filter(user=user, job_url=job['apply_link']).first()
+    if favorite:
+        favorite.delete()
+        return False
+    Favorite.objects.create(
+        user=user,
+        job_title=job['title'],
+        company=job['company'] or 'Unknown company',
+        location=job['location'],
+        job_url=job['apply_link'],
+        job_description=job['description'][:2000],
+    )
+    return True    

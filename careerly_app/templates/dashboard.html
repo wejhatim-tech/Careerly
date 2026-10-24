@@ -81,7 +81,21 @@
                     </div>
                 </div>
             </section>
+            <!-- My Favourites -->
+<section class="dashboard-card">
+    <div class="dashboard-section-heading">
+        <h2>My Favourites</h2>
+    </div>
 
+    {% for fav in favorites %}
+        <a href="/favorite/{{ fav.id }}" class="favorite-item">
+            <strong>{{ fav.job_title }}</strong>
+            <span>{{ fav.company }}{% if fav.location %} • {{ fav.location }}{% endif %}</span>
+        </a>
+    {% empty %}
+        <p class="no-skills">No saved jobs yet.</p>
+    {% endfor %}
+</section>
             <!-- AI Job Recommendations -->
             <section class="dashboard-card">
                 <div class="dashboard-section-heading">

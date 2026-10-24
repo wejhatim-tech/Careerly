@@ -1795,3 +1795,55 @@ body {
 .check-dropdown .check-option:hover {
     background: var(--background);
 }
+/* Favourite heart button */
+.job-heart-btn {
+    border: none;
+    background: none;
+    font-size: 1.8rem;
+    line-height: 1;
+    color: #b0bcc6;
+    cursor: pointer;
+    vertical-align: middle;
+    margin-left: 10px;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.job-heart-btn:hover {
+    transform: scale(1.2);
+    color: #e0475b;
+}
+
+.job-heart-btn.is-saved {
+    color: #e0475b;
+}
+
+/* My Favourites list */
+.favorite-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    border: 1px solid var(--soft-blue);
+    border-radius: 10px;
+    color: var(--primary);
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.favorite-item:hover {
+    background: var(--background);
+}
+
+.favorite-item span {
+    color: #5b6b7a;
+}
+/* Heart next to the match badge */
+.job-header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.job-header-top .job-heart-btn {
+    margin: 0;
+}

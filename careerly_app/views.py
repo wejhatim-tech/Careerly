@@ -4,6 +4,7 @@ from . import models
 from django.db.models import Q
 from django.http import JsonResponse
 from . import ai
+from urllib.parse import quote
 
 
 def index(request):
@@ -299,6 +300,7 @@ def job_details(request):
         'user': user,
         'job': job,
         'applied': models.has_applied(user.id, job['apply_link']),
+        'favorite': models.is_favorite(user.id, job['apply_link']),
     }
     return render(request, 'job_details.html', context)
 
@@ -384,6 +386,7 @@ def dashboard(request):
         'skills': skills,
         'applications': applications,
         'saved_jobs': request.session.get('jobs', []),
+        'favorites': models.get_user_favorites(user.id),
     }
 
     return render(request, 'dashboard.html', context)
@@ -519,3 +522,62 @@ def application_details(request, id):
     }
 
     return render(request, 'job_details.html', context)
+
+def favorite_job(request):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    if request.method != 'POST':
+        return redirect('/dashboard')
+
+    user = models.get_user_by_id(request.session['user_id'])
+    job_id = request.POST.get('job_id', '')
+    jobs = request.session.get('jobs', [])
+    job = next((j for j in jobs if j['job_id'] == job_id), None)
+
+    if not job or not job['apply_link']:
+        messages.error(request, 'Job not found, please search again')
+        return redirect('/dashboard')
+    models.toggle_favorite(user, job)
+    return redirect(f'/job?id={quote(job_id)}')
+
+def favorite_details(request, id):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    user = models.get_user_by_id(request.session['user_id'])
+    favorite = models.Favorite.objects.filter(id=id, user=user).first()
+
+    if not favorite:
+        messages.error(request, 'Job not found')
+        return redirect('/dashboard')
+
+    job = {
+        'title': favorite.job_title,
+        'company': favorite.company,
+        'location': favorite.location,
+        'description': favorite.job_description,
+        'apply_link': favorite.job_url,
+        'match': 'Possible',
+        'reason': 'This job was saved in your favourites.',
+        'job_id': ''
+    }
+
+    context = {
+        'user': user,
+        'job': job,
+        'applied': models.has_applied(user.id, favorite.job_url),
+        'favorite_id': favorite.id,
+    }
+    return render(request, 'job_details.html', context)    
+
+def remove_favorite(request, id):
+    # Check if user is logged in
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    if request.method == 'POST':
+        models.Favorite.objects.filter(id=id, user_id=request.session['user_id']).delete()
+    return redirect('/dashboard')    
