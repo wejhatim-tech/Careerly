@@ -2,10 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from . import models
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from . import ai
 from urllib.parse import quote
-
 
 def index(request):
     return render(request, 'index.html')
@@ -164,6 +163,23 @@ def admin_message(request, id):
     }
     return render(request, 'admin_message.html', context)
 
+def remove_admin_message(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    admin = models.User.objects.get(id=request.session['user_id'])
+
+    if admin.role != 'admin':
+        return redirect('/dashboard')
+
+    if request.method == 'POST':
+        message = models.ContactMessage.objects.filter(id=id).first()
+
+        if message:
+            message.delete()
+            messages.success(request, 'Message removed successfully')
+
+    return redirect('/admin-dashboard')
 
 def logout(request):
     request.session.flush()
@@ -283,82 +299,313 @@ def job_details(request):
         return redirect('/login')
 
     user = models.get_user_by_id(request.session['user_id'])
+
     if user.role == 'admin':
         return redirect('/admin-dashboard')
 
-    # Jobs are saved in the session by Find My Best Jobs
     job_id = request.GET.get('id', '')
     jobs = request.session.get('jobs', [])
-    job = next((j for j in jobs if j['job_id'] == job_id), None)
 
+    job = next(
+        (
+            job_item
+            for job_item in jobs
+            if job_item.get('job_id') == job_id
+        ),
+        None
+    )
 
     if not job:
-        messages.error(request, 'Job not found, please search again')
+        messages.error(
+            request,
+            'Job not found, please search again'
+        )
         return redirect('/dashboard')
+
+    job_url = job.get('apply_link', '')
+
+    # Get latest saved AI results for this job
+    cv_review = models.AIReview.objects.filter(
+        user=user,
+        job_url=job_url,
+        review_type='cv'
+    ).order_by('-created_at').first()
+
+    cover_review = models.AIReview.objects.filter(
+        user=user,
+        job_url=job_url,
+        review_type='cover_letter'
+    ).order_by('-created_at').first()
+
+    interview_review = models.AIReview.objects.filter(
+        user=user,
+        job_url=job_url,
+        review_type='interview'
+    ).order_by('-created_at').first()
 
     context = {
         'user': user,
         'job': job,
-        'applied': models.has_applied(user.id, job['apply_link']),
-        'favorite': models.is_favorite(user.id, job['apply_link']),
+        'applied': models.has_applied(
+            user.id,
+            job_url
+        ),
+        'favorite': models.is_favorite(
+            user.id,
+            job_url
+        ),
+        'cv_review': cv_review,
+        'cover_review': cover_review,
+        'interview_review': interview_review,
     }
-    return render(request, 'job_details.html', context)
+
+    return render(
+        request,
+        'job_details.html',
+        context
+    )
 
 
 def job_ai(request):
     # Check if user is logged in
     if 'user_id' not in request.session:
-        return JsonResponse({'success': False, 'message': 'Please log in first'}, status=401)
+        return JsonResponse({
+            'success': False,
+            'message': 'Please log in first'
+        }, status=401)
 
     if request.method != 'POST':
-        return JsonResponse({'success': False}, status=400)
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid request'
+        }, status=400)
 
     user = models.get_user_by_id(request.session['user_id'])
+
+    if user.role != 'user':
+        return JsonResponse({
+            'success': False,
+            'message': 'Access denied'
+        }, status=403)
+
     tool = request.POST.get('tool', '')
     job_id = request.POST.get('job_id', '')
+    job_url = request.POST.get('job_url', '')
 
-    # Find the job saved in the session
+    # Try to find the job in the session
     jobs = request.session.get('jobs', [])
-    job = next((j for j in jobs if j['job_id'] == job_id), None)
+
+    job = next(
+        (
+            job_item
+            for job_item in jobs
+            if job_item.get('job_id') == job_id
+        ),
+        None
+    )
+
+    application = None
+
+    # If job was found in session, get its real URL
+    if job:
+        job_url = job.get('apply_link', job_url)
+
+    # If job is not in session, try to find it in My Applications
+    if not job and job_url:
+        application = models.Application.objects.filter(
+            user=user,
+            job_url=job_url
+        ).first()
+
+        if application:
+            job = {
+                'job_id': '',
+                'title': application.job_title,
+                'company': application.company,
+                'location': application.location or '',
+                'description': application.job_description or '',
+                'apply_link': application.job_url,
+            }
+
     if not job:
-        return JsonResponse({'success': False, 'message': 'Job not found, please search again'})
+        return JsonResponse({
+            'success': False,
+            'message': 'Job not found'
+        })
+
+    # Find the related application if it exists
+    if not application:
+        application = models.Application.objects.filter(
+            user=user,
+            job_url=job.get('apply_link', '')
+        ).first()
 
     profile = models.get_profile_by_user(user.id)
 
-    if tool in ['cv', 'cover_letter']:
+    content = ''
+    result = ''
+    file_name = ''
+    uploaded_file = None
+
+    # CV Feedback
+    if tool == 'cv':
         file = request.FILES.get('file')
+
         if not file:
-            return JsonResponse({'success': False, 'message': 'Please upload a PDF file'})
+            return JsonResponse({
+                'success': False,
+                'message': 'Please upload your CV as a PDF'
+            })
+
         if not file.name.lower().endswith('.pdf'):
-            return JsonResponse({'success': False, 'message': 'Only PDF files are allowed'})
+            return JsonResponse({
+                'success': False,
+                'message': 'Only PDF files are allowed'
+            })
+
         if file.size > 5 * 1024 * 1024:
-            return JsonResponse({'success': False, 'message': 'File must be smaller than 5 MB'})
+            return JsonResponse({
+                'success': False,
+                'message': 'File must be smaller than 5 MB'
+            })
 
         content = ai.read_pdf(file)
-        if len(content) < 50:
-            return JsonResponse({'success': False, 'message': 'Could not read text from this PDF'})
-        result = ai.review_document(tool, content, job, profile)
 
+        if len(content) < 50:
+            return JsonResponse({
+                'success': False,
+                'message': 'Could not read text from this PDF'
+            })
+
+        file_name = file.name
+        file.seek(0)
+        uploaded_file = file
+
+        result = ai.review_document(
+            'cv',
+            content,
+            job,
+            profile
+        )
+
+    # Cover Letter Feedback
+    elif tool == 'cover_letter':
+        file = request.FILES.get('file')
+        text_content = request.POST.get('text_content', '').strip()
+
+        # User wrote the cover letter as text
+        if text_content:
+            content = text_content
+
+        # User uploaded the cover letter as PDF
+        elif file:
+            if not file.name.lower().endswith('.pdf'):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Only PDF files are allowed'
+                })
+
+            if file.size > 5 * 1024 * 1024:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'File must be smaller than 5 MB'
+                })
+
+            content = ai.read_pdf(file)
+
+            if len(content) < 50:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Could not read text from this PDF'
+                })
+
+            file_name = file.name
+            file.seek(0)
+            uploaded_file = file
+
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please upload a PDF or write your cover letter'
+            })
+
+        if len(content) < 30:
+            return JsonResponse({
+                'success': False,
+                'message': 'Cover letter text is too short'
+            })
+
+        result = ai.review_document(
+            'cover_letter',
+            content,
+            job,
+            profile
+        )
+
+    # Interview Questions
     elif tool == 'interview':
-        skills = [us.skill.name for us in models.get_user_skills(user.id)]
+        skills = [
+            user_skill.skill.name
+            for user_skill in models.get_user_skills(user.id)
+        ]
+
         content = f"{job['title']} - {job['company']}"
-        result = ai.interview_questions(job, profile, skills)
+
+        result = ai.interview_questions(
+            job,
+            profile,
+            skills
+        )
 
     else:
-        return JsonResponse({'success': False, 'message': 'Unknown tool'})
+        return JsonResponse({
+            'success': False,
+            'message': 'Unknown tool'
+        })
 
+    # AI failed
     if not result:
-        return JsonResponse({'success': False, 'message': 'AI is busy, please try again'})
+        return JsonResponse({
+            'success': False,
+            'message': 'AI is busy, please try again'
+        })
 
-    # Save the result in AIReview
+    # Save AI input and result
     models.AIReview.objects.create(
         user=user,
+        application=application,
         review_type=tool,
+        job_url=job.get('apply_link', ''),
+        file_name=file_name,
+        uploaded_file=uploaded_file,
         content=content,
         result=result,
     )
-    return JsonResponse({'success': True, 'result': result})
 
+    return JsonResponse({
+        'success': True,
+        'result': result,
+        'file_name': file_name,
+    })
+
+def download_ai_file(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    review = models.AIReview.objects.filter(
+        id=id,
+        user_id=request.session['user_id']
+    ).first()
+
+    if not review or not review.uploaded_file:
+        messages.error(request, 'File not found')
+        return redirect('/dashboard')
+
+    return FileResponse(
+        review.uploaded_file.open('rb'),
+        as_attachment=True,
+        filename=review.file_name
+    )
 
 def dashboard(request):
     # Check if user is logged in
@@ -519,7 +766,10 @@ def application_details(request, id):
     ).first()
 
     if not application:
-        messages.error(request, 'Application not found')
+        messages.error(
+            request,
+            'Application not found'
+        )
         return redirect('/dashboard')
 
     job = {
@@ -533,13 +783,39 @@ def application_details(request, id):
         'job_id': ''
     }
 
+    # Get latest saved AI results for this job
+    cv_review = models.AIReview.objects.filter(
+        user=user,
+        job_url=application.job_url,
+        review_type='cv'
+    ).order_by('-created_at').first()
+
+    cover_review = models.AIReview.objects.filter(
+        user=user,
+        job_url=application.job_url,
+        review_type='cover_letter'
+    ).order_by('-created_at').first()
+
+    interview_review = models.AIReview.objects.filter(
+        user=user,
+        job_url=application.job_url,
+        review_type='interview'
+    ).order_by('-created_at').first()
+
     context = {
         'user': user,
         'job': job,
         'applied': True,
+        'cv_review': cv_review,
+        'cover_review': cover_review,
+        'interview_review': interview_review,
     }
 
-    return render(request, 'job_details.html', context)
+    return render(
+        request,
+        'job_details.html',
+        context
+    )
 
 def remove_application(request, id):
     if 'user_id' not in request.session:
@@ -622,11 +898,18 @@ def favorite_details(request, id):
         return redirect('/login')
 
     user = models.get_user_by_id(request.session['user_id'])
-    favorite = models.Favorite.objects.filter(id=id, user=user).first()
+
+    favorite = models.Favorite.objects.filter(
+        id=id,
+        user=user
+    ).first()
 
     if not favorite:
-        messages.error(request, 'Job not found')
-        return redirect('/dashboard')
+        messages.error(
+            request,
+            'Job not found'
+        )
+        return redirect('/favorites')
 
     job = {
         'title': favorite.job_title,
@@ -639,13 +922,43 @@ def favorite_details(request, id):
         'job_id': ''
     }
 
+    # Get latest saved AI results for this job
+    cv_review = models.AIReview.objects.filter(
+        user=user,
+        job_url=favorite.job_url,
+        review_type='cv'
+    ).order_by('-created_at').first()
+
+    cover_review = models.AIReview.objects.filter(
+        user=user,
+        job_url=favorite.job_url,
+        review_type='cover_letter'
+    ).order_by('-created_at').first()
+
+    interview_review = models.AIReview.objects.filter(
+        user=user,
+        job_url=favorite.job_url,
+        review_type='interview'
+    ).order_by('-created_at').first()
+
     context = {
         'user': user,
         'job': job,
-        'applied': models.has_applied(user.id, favorite.job_url),
+        'applied': models.has_applied(
+            user.id,
+            favorite.job_url
+        ),
         'favorite_id': favorite.id,
+        'cv_review': cv_review,
+        'cover_review': cover_review,
+        'interview_review': interview_review,
     }
-    return render(request, 'job_details.html', context)    
+
+    return render(
+        request,
+        'job_details.html',
+        context
+    )
 
 def remove_favorite(request, id):
     # Check if user is logged in

@@ -99,7 +99,25 @@
 .admin-table {
     margin-bottom: 0;
 }
+.contact-messages-table th:nth-child(1),
+.contact-messages-table td:nth-child(1) {
+    width: 25%;
+}
 
+.contact-messages-table th:nth-child(2),
+.contact-messages-table td:nth-child(2) {
+    width: 28%;
+}
+
+.contact-messages-table th:nth-child(3),
+.contact-messages-table td:nth-child(3) {
+    width: 22%;
+}
+
+.contact-messages-table th:nth-child(4),
+.contact-messages-table td:nth-child(4) {
+    width: 25%;
+}
 .admin-table th {
     color: var(--muted);
     font-size: 12px;
@@ -188,4 +206,32 @@
     font-size: 15px;
     line-height: 1.7;
     margin: 6px 0 0;
+}
+
+.admin-message-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-message-actions form {
+    margin: 0;
+}
+
+.admin-message-remove {
+    background-color: var(--white);
+    color: #B42318;
+    border: 1px solid #E6B8B4;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-message-remove:hover {
+    background-color: #FFF5F4;
+    color: #B42318;
+    border-color: #B42318;
 }

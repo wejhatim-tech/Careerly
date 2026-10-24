@@ -23,7 +23,7 @@
                 {% endfor %}
             {% endif %}
 
-            <a href="/dashboard" class="job-back">&larr; Back to my jobs</a>
+            <a href="/dashboard" class="page-back-btn">&larr; Back to Dashboard</a>
 
             <!-- Job Header -->
             <div class="job-card-main">
@@ -89,54 +89,342 @@
             </div>
 
             <!-- AI Tools -->
-            <div class="profile-card">
-                <h3 class="profile-section-title">Prepare with AI</h3>
-                <p class="skills-description">Get feedback on your CV and cover letter for this job, and practice interview questions.</p>
-                {% csrf_token %}
+<div class="profile-card ai-section">
 
-                <div class="row g-3 mt-2">
-                    <div class="col-md-4">
-                        <form class="ai-tool ai-form" data-tool="cv" data-job="{{ job.job_id }}">
-                            <h5>CV Feedback</h5>
-                            <p>Upload your CV (PDF) to see how well it fits this job.</p>
-                            <input type="file" name="file" accept=".pdf" class="d-none ai-file" id="cv-file">
-                            <label for="cv-file" class="file-picker">
-                            <span class="file-btn">Choose PDF</span>
-                            <span class="file-name">No file chosen</span>
-                            </label>
-                            <button type="submit" class="btn add-skill-btn w-100">Review my CV</button>
-                        </form>
-                    </div>
+    <div class="ai-section-heading">
+        <div>
+            <h3 class="profile-section-title">Prepare with AI</h3>
+            <p class="skills-description">
+                Get personalized feedback for this job and prepare with confidence.
+            </p>
+        </div>
+    </div>
 
-                    <div class="col-md-4">
-                        <form class="ai-tool ai-form" data-tool="cover_letter" data-job="{{ job.job_id }}">
-                            <h5>Cover Letter Feedback</h5>
-                            <p>Upload your cover letter (PDF) to improve it for this job.</p>
-                            <input type="file" name="file" accept=".pdf" class="d-none ai-file" id="cover-file">
-                            <label for="cover-file" class="file-picker">
-                            <span class="file-btn">Choose PDF</span>
-                            <span class="file-name">No file chosen</span>
-                            </label>
-                            <button type="submit" class="btn add-skill-btn w-100">Review my cover letter</button>
-                        </form>
-                    </div>
+    {% csrf_token %}
 
-                    <div class="col-md-4">
-                        <form class="ai-tool ai-form" data-tool="interview" data-job="{{ job.job_id }}">
-                            <h5>Interview Questions</h5>
-                            <p>Get questions you may be asked for this job, with tips.</p>
-                            <button type="submit" class="btn add-skill-btn w-100">Generate questions</button>
-                        </form>
-                    </div>
+    <div class="row g-3 mt-2">
+
+        <!-- CV Feedback -->
+        <div class="col-md-4">
+            <form
+                class="ai-tool ai-form"
+                data-tool="cv"
+                data-job="{{ job.job_id }}"
+                data-job-url="{{ job.apply_link }}"
+            >
+
+                <div class="ai-tool-header">
+                    <h5>CV Feedback</h5>
+
+                    {% if cv_review %}
+                        <span class="ai-saved-badge">Saved ✓</span>
+                    {% endif %}
                 </div>
 
-                <div class="ai-result" id="ai-result"></div>
+                <p>
+                    Upload your CV to see how well it fits this job.
+                </p>
+
+                {% if cv_review and cv_review.file_name %}
+                    <div class="ai-saved-file">
+                        <span>Last CV</span>
+                        <strong>{{ cv_review.file_name }}</strong>
+                    </div>
+                {% endif %}
+
+                <input
+                    type="file"
+                    name="file"
+                    accept=".pdf"
+                    class="d-none ai-file"
+                    id="cv-file"
+                >
+
+                <label for="cv-file" class="file-picker">
+                    <span class="file-btn">Choose PDF</span>
+                    <span class="file-name">No file chosen</span>
+                </label>
+
+                <button
+                    type="submit"
+                    class="btn add-skill-btn w-100 ai-submit-btn"
+                >
+                    Review my CV
+                </button>
+
+            </form>
+        </div>
+
+
+        <!-- Cover Letter Feedback -->
+        <div class="col-md-4">
+            <form
+                class="ai-tool ai-form"
+                data-tool="cover_letter"
+                data-job="{{ job.job_id }}"
+                data-job-url="{{ job.apply_link }}"
+            >
+
+                <div class="ai-tool-header">
+                    <h5>Cover Letter Feedback</h5>
+
+                    {% if cover_review %}
+                        <span class="ai-saved-badge">Saved ✓</span>
+                    {% endif %}
+                </div>
+
+                <p>
+                    Upload a PDF or write your cover letter directly.
+                </p>
+
+                {% if cover_review and cover_review.file_name %}
+                    <div class="ai-saved-file">
+                        <span>Last file</span>
+                        <strong>{{ cover_review.file_name }}</strong>
+                    </div>
+                {% endif %}
+
+                <div class="cover-mode-switch">
+
+                    <button
+                        type="button"
+                        class="cover-mode-btn {% if not cover_review or cover_review.file_name %}active{% endif %}"
+                        data-mode="pdf"
+                    >
+                        PDF
+                    </button>
+
+                    <button
+                        type="button"
+                        class="cover-mode-btn {% if cover_review and not cover_review.file_name %}active{% endif %}"
+                        data-mode="text"
+                    >
+                        Write text
+                    </button>
+
+                </div>
+
+                <div
+                    class="cover-pdf-box {% if cover_review and not cover_review.file_name %}d-none{% endif %}"
+                >
+                    <input
+                        type="file"
+                        name="file"
+                        accept=".pdf"
+                        class="d-none ai-file"
+                        id="cover-file"
+                    >
+
+                    <label for="cover-file" class="file-picker">
+                        <span class="file-btn">Choose PDF</span>
+                        <span class="file-name">No file chosen</span>
+                    </label>
+                </div>
+
+                <div
+                    class="cover-text-box {% if not cover_review or cover_review.file_name %}d-none{% endif %}"
+                >
+                    <textarea
+                        name="text_content"
+                        class="cover-letter-text"
+                        placeholder="Write or paste your cover letter here..."
+                    >{% if cover_review and not cover_review.file_name %}{{ cover_review.content }}{% endif %}</textarea>
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn add-skill-btn w-100 ai-submit-btn"
+                >
+                    Review my cover letter
+                </button>
+
+            </form>
+        </div>
+
+
+        <!-- Interview Questions -->
+        <div class="col-md-4">
+            <form
+                class="ai-tool ai-form"
+                data-tool="interview"
+                data-job="{{ job.job_id }}"
+                data-job-url="{{ job.apply_link }}"
+            >
+
+                <div class="ai-tool-header">
+                    <h5>Interview Questions</h5>
+
+                    {% if interview_review %}
+                        <span class="ai-saved-badge">Saved ✓</span>
+                    {% endif %}
+                </div>
+
+                <p>
+                    Generate questions and tips for this specific role.
+                </p>
+
+                {% if interview_review %}
+                    <div class="ai-saved-note">
+                        Your latest questions are saved below.
+                    </div>
+                {% endif %}
+
+                <button
+                    type="submit"
+                    class="btn add-skill-btn w-100 ai-submit-btn"
+                >
+                    Generate questions
+                </button>
+
+            </form>
+        </div>
+
+    </div>
+
+
+    <!-- AI Results -->
+    <div class="ai-results-section">
+
+        <div class="ai-results-header">
+            <div>
+                <span class="profile-label">Saved AI Support</span>
+                <h4>AI Results</h4>
             </div>
+        </div>
+
+        <div class="ai-result-tabs">
+
+            <button
+                type="button"
+                class="ai-result-tab active"
+                data-result-tab="cv"
+            >
+                CV Feedback
+            </button>
+
+            <button
+                type="button"
+                class="ai-result-tab"
+                data-result-tab="cover_letter"
+            >
+                Cover Letter
+            </button>
+
+            <button
+                type="button"
+                class="ai-result-tab"
+                data-result-tab="interview"
+            >
+                Interview Questions
+            </button>
+
+        </div>
+
+
+        <!-- CV Result -->
+        <div
+            class="ai-saved-result active"
+            id="result-cv"
+            data-result="cv"
+        >
+            {% if cv_review %}
+                <div class="ai-result-meta">
+                    <span>Latest saved result</span>
+
+                    {% if cv_review and cv_review.file_name %}
+    <div class="ai-saved-file">
+        <div>
+            <span>Saved CV</span>
+            <strong>{{ cv_review.file_name }}</strong>
+        </div>
+
+        {% if cv_review.uploaded_file %}
+            <a
+                href="/ai-review/{{ cv_review.id }}/download"
+                class="ai-download-link"
+            >
+                Download
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+                </div>
+
+                <div class="ai-result-content">
+                    {{ cv_review.result|linebreaksbr }}
+                </div>
+            {% else %}
+                <p class="ai-empty-result">
+                    Your CV feedback will appear here after your first review.
+                </p>
+            {% endif %}
+        </div>
+
+
+        <!-- Cover Letter Result -->
+        <div
+            class="ai-saved-result"
+            id="result-cover_letter"
+            data-result="cover_letter"
+        >
+            {% if cover_review %}
+                <div class="ai-result-meta">
+                    <span>Latest saved result</span>
+
+                    {% if cover_review.file_name %}
+                        <span>{{ cover_review.file_name }}</span>
+                    {% else %}
+                        <span>Written text</span>
+                    {% endif %}
+                </div>
+
+                <div class="ai-result-content">
+                    {{ cover_review.result|linebreaksbr }}
+                </div>
+            {% else %}
+                <p class="ai-empty-result">
+                    Your cover letter feedback will appear here after your first review.
+                </p>
+            {% endif %}
+        </div>
+
+
+        <!-- Interview Result -->
+        <div
+            class="ai-saved-result"
+            id="result-interview"
+            data-result="interview"
+        >
+            {% if interview_review %}
+                <div class="ai-result-meta">
+                    <span>Latest saved result</span>
+                </div>
+
+                <div class="ai-result-content">
+                    {{ interview_review.result|linebreaksbr }}
+                </div>
+            {% else %}
+                <p class="ai-empty-result">
+                    Your interview questions will appear here after you generate them.
+                </p>
+            {% endif %}
+        </div>
+
+
+        <!-- Loading / Error Result -->
+        <div
+            class="ai-result"
+            id="ai-result"
+        ></div>
+
+    </div>
+
+</div>
 
         </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/job.js' %}"></script>
+    <script src="{% static 'js/job.js' %}?v=3"></script>
 </body>
 </html>

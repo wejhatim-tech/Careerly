@@ -177,11 +177,17 @@ class ContactMessage(models.Model): # No user field : because any visitor can se
 
 
 class AIReview(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ai_reviews') # One to Many between AI and user
-    application = models.ForeignKey(Application, on_delete=models.SET_NULL, null=True, blank=True, related_name='ai_reviews') # Many to Many
-    review_type = models.CharField(max_length=15)   # cv / cover_letter / interview
-    content = models.TextField()  # CV or Cover Letter
-    result = models.TextField()   # AI Response ( Notes / AI Interview question)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='ai_reviews')
+    application = models.ForeignKey(Application,on_delete=models.SET_NULL,null=True,blank=True,related_name='ai_reviews')
+
+    review_type = models.CharField(max_length=15)
+    job_url = models.URLField(max_length=500,null=True,blank=True)
+    file_name = models.CharField(max_length=255, null=True, blank=True)
+    uploaded_file = models.FileField(upload_to='ai_documents/',null=True,blank=True)
+
+    content = models.TextField()
+    result = models.TextField()
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
