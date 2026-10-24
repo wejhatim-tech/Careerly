@@ -164,6 +164,23 @@ def admin_message(request, id):
     }
     return render(request, 'admin_message.html', context)
 
+def remove_admin_message(request, id):
+    if 'user_id' not in request.session:
+        return redirect('/login')
+
+    admin = models.User.objects.get(id=request.session['user_id'])
+
+    if admin.role != 'admin':
+        return redirect('/dashboard')
+
+    if request.method == 'POST':
+        message = models.ContactMessage.objects.filter(id=id).first()
+
+        if message:
+            message.delete()
+            messages.success(request, 'Message removed successfully')
+
+    return redirect('/admin-dashboard')
 
 def logout(request):
     request.session.flush()

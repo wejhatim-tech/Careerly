@@ -73,7 +73,7 @@
             <!-- رسائل التواصل -->
             <h2 class="admin-section-title mb-3">Contact messages</h2>
             <div class="admin-card table-responsive">
-                <table class="table admin-table">
+                <table class="table admin-table contact-messages-table">
                     <thead>
                         <tr><th>Name</th><th>Subject</th><th>Date</th><th>Action</th></tr>
                     </thead>
@@ -83,7 +83,15 @@
                             <td class="name-cell">{{ msg.name }}</td>
                             <td>{{ msg.subject }}</td>
                             <td class="muted-cell">{{ msg.created_at|date:"M d, Y" }}</td>
-                            <td><a href="/admin-dashboard/message/{{ msg.id }}" class="btn view-btn">View</a></td>
+                            <td> <div class="admin-message-actions">
+                                    <a href="/admin-dashboard/message/{{ msg.id }}" class="btn view-btn">View</a>
+
+                                    <form action="/admin-dashboard/message/{{ msg.id }}/remove" method="POST">
+                                    {% csrf_token %}
+
+                                        <button type="submit" class="admin-message-remove">Remove</button></form>
+                                </div>
+                            </td>
                         </tr>
                         {% empty %}
                         <tr><td colspan="4" class="muted-cell">No messages yet.</td></tr>

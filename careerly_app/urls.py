@@ -11,6 +11,7 @@ urlpatterns = [
     path('admin-dashboard/user/<int:id>', views.admin_user),
     path('admin-dashboard/user/<int:id>/status', views.toggle_user_status),
     path('admin-dashboard/message/<int:id>', views.admin_message),
+    path('admin-dashboard/message/<int:id>/remove', views.remove_admin_message),
     path('logout', views.logout),
     path('profile', views.profile),
     path('profile/create', views.create_profile),
