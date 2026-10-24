@@ -506,17 +506,7 @@ body {
     margin-bottom: 20px;
 }
 
-.profile-details span {
-    display: block;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 600;
-}
 
-.profile-details p {
-    color: var(--text);
-    margin: 5px 0 0;
-}
 
 .profile-edit-btn,
 .save-profile-btn,
@@ -1630,4 +1620,62 @@ body {
     border-color: #2e7d32;
     color: #2e7d32;
     opacity: 1;
+}
+
+/* Make profile labels stand out */
+.profile-details span {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.profile-details p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--primary);
+}
+
+/* Profile and dashboard: same label and value style */
+.profile-view-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 18px;
+}
+
+.profile-card .profile-details span,
+.dashboard-card .dashboard-profile-info span,
+.dashboard-card .dashboard-skills > span {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.profile-card .profile-details p,
+.dashboard-card .dashboard-profile-info p {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #5b6b7a;
+}
+
+/* Center each value under its label */
+.profile-card .profile-details > div,
+.dashboard-card .dashboard-profile-info > div {
+    display: grid;
+    justify-content: start;
+    justify-items: center;
+}
+.profile-card .profile-details > div span,
+.dashboard-card .dashboard-profile-info > div span {
+    justify-self: start;
 }
