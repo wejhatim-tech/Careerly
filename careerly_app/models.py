@@ -46,11 +46,10 @@ class ProfileManager(models.Manager):
             errors['years_experience'] = 'Years of experience must be a number'
         if len(formdata['preferred_location']) < 2:
             errors['preferred_location'] = 'Please enter your preferred location'
-        if not formdata.get('work_mode'):
-            errors['work_mode'] = 'Please select your preferred work mode'
-        if not formdata.get('employment_type'):
-            errors['employment_type'] = 'Please select your employment type'
-        return errors
+        if not formdata.getlist('work_mode'):
+            errors['work_mode'] = 'Please select at least one work mode'
+        if not formdata.getlist('employment_type'):
+            errors['employment_type'] = 'Please select at least one employment type'
 
 
 class ContactMessageManager(models.Manager):
@@ -88,8 +87,8 @@ class Profile(models.Model):
     career_level = models.CharField(max_length=30)
     years_experience = models.PositiveIntegerField(default=0)
     preferred_location = models.CharField(max_length=100)
-    work_mode = models.CharField(max_length=20)
-    employment_type = models.CharField(max_length=30)
+    work_mode = models.CharField(max_length=100)
+    employment_type = models.CharField(max_length=100)
     bio = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -97,7 +96,13 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.target_role}"
+        
+# Turn the saved text (e.g. "remote,hybrid") into a list for the templates
+    def work_mode_list(self):
+        return self.work_mode.split(',') if self.work_mode else []
 
+    def employment_type_list(self):
+        return self.employment_type.split(',') if self.employment_type else []
 
 
 class Skill(models.Model):
@@ -197,8 +202,8 @@ def create_profile(user, data):
         career_level=data['career_level'],
         years_experience=data['years_experience'],
         preferred_location=data['preferred_location'],
-        work_mode=data['work_mode'],
-        employment_type=data['employment_type'],
+        work_mode=','.join(data.getlist('work_mode')),
+        employment_type=','.join(data.getlist('employment_type')),
         bio=data['bio']
     )
 
@@ -209,8 +214,8 @@ def update_profile(profile, data):
     profile.career_level = data['career_level']
     profile.years_experience = data['years_experience']
     profile.preferred_location = data['preferred_location']
-    profile.work_mode = data['work_mode']
-    profile.employment_type = data['employment_type']
+    profile.work_mode = ','.join(data.getlist('work_mode'))
+    profile.employment_type = ','.join(data.getlist('employment_type'))
     profile.bio = data['bio']
     profile.save()
 

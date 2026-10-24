@@ -1714,3 +1714,84 @@ body {
     min-height: 52px;
     padding: 0 24px;
 }
+
+/* Checkbox options in profile form */
+.check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.check-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid var(--soft-blue);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.check-option:hover {
+    background-color: var(--background);
+    border-color: var(--secondary);
+}
+
+.check-option input {
+    accent-color: var(--primary);
+}
+
+/* Multi-select dropdown for profile choices */
+.check-dropdown {
+    position: relative;
+}
+
+.check-dropdown summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 14px 18px;
+    border: 1px solid var(--soft-blue);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--primary);
+}
+
+.check-dropdown summary::after {
+    content: "▾";
+    float: right;
+}
+
+.check-dropdown .check-group {
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid var(--soft-blue);
+    border-radius: 10px;
+    box-shadow: 0 8px 18px rgba(24, 53, 75, 0.12);
+}
+
+/* Dropdown options as a simple vertical list */
+.check-dropdown .check-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px;
+}
+
+.check-dropdown .check-option {
+    border: none;
+    background: none;
+    padding: 6px 10px;
+    margin: 0;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    width: 100%;
+}
+
+.check-dropdown .check-option:hover {
+    background: var(--background);
+}

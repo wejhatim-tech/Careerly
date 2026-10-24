@@ -229,6 +229,7 @@ Target role: {profile.target_role}
 Career level: {profile.career_level}
 Location: {profile.preferred_location}
 Work mode: {profile.work_mode}
+Employment type: {profile.employment_type}
 Skills: {', '.join(skills) if skills else 'Not provided'}
 
 Suitable career levels:
@@ -283,7 +284,7 @@ match must be one of: Excellent, Good, Possible.
         fallback_jobs = []
 
         for job in jobs:
-            if profile.work_mode.lower() == 'remote':
+            if profile.work_mode_list() == ['remote']:
                 if not remote_location_match(profile.preferred_location, job):
                     continue
 

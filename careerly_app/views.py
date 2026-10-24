@@ -417,7 +417,7 @@ def find_jobs(request):
 
     country = ai.get_country_code(profile.preferred_location)
 
-    if profile.work_mode.lower() == 'remote':
+    if profile.work_mode_list() == ['remote']:
 
         query = f"{profile.target_role} remote worldwide"
 
