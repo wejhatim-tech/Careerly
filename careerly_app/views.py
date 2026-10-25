@@ -380,7 +380,9 @@ def job_ai(request):
             'message': 'Invalid request'
         }, status=400)
 
-    user = models.get_user_by_id(request.session['user_id'])
+    user = models.get_user_by_id(
+        request.session['user_id']
+    )
 
     if user.role != 'user':
         return JsonResponse({
@@ -392,25 +394,31 @@ def job_ai(request):
     job_id = request.POST.get('job_id', '')
     job_url = request.POST.get('job_url', '')
 
-    # Try to find the job in the session
     jobs = request.session.get('jobs', [])
 
-    job = next(
-        (
-            job_item
-            for job_item in jobs
-            if job_item.get('job_id') == job_id
-        ),
-        None
-    )
+    job = None
+
+    # Try to find the job in the current search session
+    if job_id:
+        job = next(
+            (
+                job_item
+                for job_item in jobs
+                if job_item.get('job_id') == job_id
+            ),
+            None
+        )
 
     application = None
 
     # If job was found in session, get its real URL
     if job:
-        job_url = job.get('apply_link', job_url)
+        job_url = job.get(
+            'apply_link',
+            job_url
+        )
 
-    # If job is not in session, try to find it in My Applications
+    # If job is not in session, try My Applications
     if not job and job_url:
         application = models.Application.objects.filter(
             user=user,
@@ -423,8 +431,29 @@ def job_ai(request):
                 'title': application.job_title,
                 'company': application.company,
                 'location': application.location or '',
-                'description': application.job_description or '',
+                'description': (
+                    application.job_description or ''
+                ),
                 'apply_link': application.job_url,
+            }
+
+    # If job is not in My Applications, try Saved Jobs
+    if not job and job_url:
+        favorite = models.Favorite.objects.filter(
+            user=user,
+            job_url=job_url
+        ).first()
+
+        if favorite:
+            job = {
+                'job_id': '',
+                'title': favorite.job_title,
+                'company': favorite.company,
+                'location': favorite.location or '',
+                'description': (
+                    favorite.job_description or ''
+                ),
+                'apply_link': favorite.job_url,
             }
 
     if not job:
@@ -433,14 +462,16 @@ def job_ai(request):
             'message': 'Job not found'
         })
 
-    # Find the related application if it exists
+    # Find related application if it exists
     if not application:
         application = models.Application.objects.filter(
             user=user,
             job_url=job.get('apply_link', '')
         ).first()
 
-    profile = models.get_profile_by_user(user.id)
+    profile = models.get_profile_by_user(
+        user.id
+    )
 
     content = ''
     result = ''
@@ -454,7 +485,9 @@ def job_ai(request):
         if not file:
             return JsonResponse({
                 'success': False,
-                'message': 'Please upload your CV as a PDF'
+                'message': (
+                    'Please upload your CV as a PDF'
+                )
             })
 
         if not file.name.lower().endswith('.pdf'):
@@ -466,7 +499,9 @@ def job_ai(request):
         if file.size > 5 * 1024 * 1024:
             return JsonResponse({
                 'success': False,
-                'message': 'File must be smaller than 5 MB'
+                'message': (
+                    'File must be smaller than 5 MB'
+                )
             })
 
         content = ai.read_pdf(file)
@@ -474,7 +509,9 @@ def job_ai(request):
         if len(content) < 50:
             return JsonResponse({
                 'success': False,
-                'message': 'Could not read text from this PDF'
+                'message': (
+                    'Could not read text from this PDF'
+                )
             })
 
         file_name = file.name
@@ -491,24 +528,31 @@ def job_ai(request):
     # Cover Letter Feedback
     elif tool == 'cover_letter':
         file = request.FILES.get('file')
-        text_content = request.POST.get('text_content', '').strip()
+        text_content = request.POST.get(
+            'text_content',
+            ''
+        ).strip()
 
-        # User wrote the cover letter as text
+        # User wrote cover letter as text
         if text_content:
             content = text_content
 
-        # User uploaded the cover letter as PDF
+        # User uploaded cover letter as PDF
         elif file:
             if not file.name.lower().endswith('.pdf'):
                 return JsonResponse({
                     'success': False,
-                    'message': 'Only PDF files are allowed'
+                    'message': (
+                        'Only PDF files are allowed'
+                    )
                 })
 
             if file.size > 5 * 1024 * 1024:
                 return JsonResponse({
                     'success': False,
-                    'message': 'File must be smaller than 5 MB'
+                    'message': (
+                        'File must be smaller than 5 MB'
+                    )
                 })
 
             content = ai.read_pdf(file)
@@ -516,7 +560,9 @@ def job_ai(request):
             if len(content) < 50:
                 return JsonResponse({
                     'success': False,
-                    'message': 'Could not read text from this PDF'
+                    'message': (
+                        'Could not read text from this PDF'
+                    )
                 })
 
             file_name = file.name
@@ -526,13 +572,18 @@ def job_ai(request):
         else:
             return JsonResponse({
                 'success': False,
-                'message': 'Please upload a PDF or write your cover letter'
+                'message': (
+                    'Please upload a PDF or write '
+                    'your cover letter'
+                )
             })
 
         if len(content) < 30:
             return JsonResponse({
                 'success': False,
-                'message': 'Cover letter text is too short'
+                'message': (
+                    'Cover letter text is too short'
+                )
             })
 
         result = ai.review_document(
@@ -546,10 +597,13 @@ def job_ai(request):
     elif tool == 'interview':
         skills = [
             user_skill.skill.name
-            for user_skill in models.get_user_skills(user.id)
+            for user_skill
+            in models.get_user_skills(user.id)
         ]
 
-        content = f"{job['title']} - {job['company']}"
+        content = (
+            f"{job['title']} - {job['company']}"
+        )
 
         result = ai.interview_questions(
             job,
@@ -563,14 +617,14 @@ def job_ai(request):
             'message': 'Unknown tool'
         })
 
-    # AI failed
     if not result:
         return JsonResponse({
             'success': False,
-            'message': 'AI is busy, please try again'
+            'message': (
+                'AI is busy, please try again'
+            )
         })
 
-    # Save AI input and result
     models.AIReview.objects.create(
         user=user,
         application=application,
@@ -658,48 +712,148 @@ def saved_jobs(request):
 def find_jobs(request):
     # Check if user is logged in
     if 'user_id' not in request.session:
-        return JsonResponse({'success': False, 'message': 'Please log in first'}, status=401)
+        return JsonResponse({
+            'success': False,
+            'message': 'Please log in first'
+        }, status=401)
 
     if request.method != 'POST':
-        return JsonResponse({'success': False}, status=400)
+        return JsonResponse({
+            'success': False
+        }, status=400)
 
-    user = models.get_user_by_id(request.session['user_id'])
+    user = models.get_user_by_id(
+        request.session['user_id']
+    )
 
     if user.role != 'user':
-        return JsonResponse({'success': False}, status=403)
+        return JsonResponse({
+            'success': False
+        }, status=403)
 
-    profile = models.get_profile_by_user(user.id)
+    profile = models.get_profile_by_user(
+        user.id
+    )
 
     if not profile:
         return JsonResponse({
             'success': False,
-            'message': 'Please complete your profile first'
+            'message': (
+                'Please complete your profile first'
+            )
         })
 
     skills = [
         user_skill.skill.name
-        for user_skill in models.get_user_skills(user.id)
+        for user_skill
+        in models.get_user_skills(user.id)
     ]
 
-    country = ai.get_country_code(profile.preferred_location)
+    work_modes = profile.work_mode_list()
 
-    if profile.work_mode_list() == ['remote']:
+    country = ai.get_country_code(
+        profile.preferred_location
+    )
 
-        query = f"{profile.target_role} remote worldwide"
+    jobs = []
 
-        jobs = ai.search_jobs(query,country='us',num=15,remote=True)
+    # Search worldwide remote jobs
+    if 'remote' in work_modes:
+        remote_query = (
+            f"{profile.target_role} remote worldwide"
+        )
 
-    else:
+        remote_jobs = ai.search_jobs(
+            remote_query,
+            country=None,
+            num=20,
+            remote=True
+        )
 
-        query = f"{profile.target_role} in {profile.preferred_location}"
+        # Keep only remote jobs suitable for the user's location
+        remote_jobs = [
+            job
+            for job in remote_jobs
+            if ai.remote_location_match(
+                profile.preferred_location,
+                job
+            )
+        ]
 
-        jobs = ai.search_jobs(
-        query,country=country,num=15,remote=False)
+        jobs.extend(remote_jobs)
+
+    # Search local jobs for hybrid or on-site
+    if (
+        'hybrid' in work_modes
+        or 'onsite' in work_modes
+    ):
+        preferred_location = (
+            profile.preferred_location.strip()
+        )
+
+        # Convert "Palestine Nablus"
+        # to "Nablus, Palestine"
+        if preferred_location.lower().startswith(
+            'palestine '
+        ):
+            city = preferred_location[
+                len('palestine '):
+            ].strip()
+
+            local_location = (
+                f"{city}, Palestine"
+            )
+
+        else:
+            local_location = preferred_location
+
+        local_query = (
+            f"{profile.target_role} "
+            f"in {local_location}"
+        )
+
+        local_jobs = ai.search_jobs(
+            local_query,
+            country=country,
+            num=20,
+            remote=False
+        )
+        
+
+        # On-site only: remove remote jobs
+        if work_modes == ['onsite']:
+            local_jobs = [
+                job
+                for job in local_jobs
+                if not job.get('is_remote')
+            ]
+
+        jobs.extend(local_jobs)
+
+    # Remove duplicate jobs
+    unique_jobs = []
+    seen_urls = set()
+
+    for job in jobs:
+        job_url = job.get('apply_link')
+
+        if not job_url:
+            continue
+
+        if job_url in seen_urls:
+            continue
+
+        seen_urls.add(job_url)
+        unique_jobs.append(job)
+
+    jobs = unique_jobs
 
     if not jobs:
         return JsonResponse({
             'success': False,
-            'message': 'No jobs found. Please try again.'
+            'message': (
+                'No jobs found. Please try again.'
+            )
         })
 
     matched_jobs = ai.match_jobs(
@@ -711,12 +865,27 @@ def find_jobs(request):
     if not matched_jobs:
         return JsonResponse({
             'success': False,
-            'message': 'Could not find suitable matches. Please try again.'
+            'message': (
+                'Could not find suitable matches. '
+                'Please try again.'
+            )
         })
 
-    # Save jobs in session for Job Details page
-        # Save the search in the history
-    models.SearchHistory.objects.create(user=user, query=query, results_count=len(matched_jobs), results=matched_jobs)
+    # Save search description in history
+    query = (
+        f"{profile.target_role} | "
+        f"{', '.join(work_modes)} | "
+        f"{profile.preferred_location}"
+    )
+
+    models.SearchHistory.objects.create(
+        user=user,
+        query=query,
+        results_count=len(matched_jobs),
+        results=matched_jobs
+    )
+
+    # Keep jobs available for Job Details
     request.session['jobs'] = matched_jobs
 
     return JsonResponse({
@@ -732,23 +901,86 @@ def apply_job(request):
     if request.method != 'POST':
         return redirect('/dashboard')
 
-    user = models.get_user_by_id(request.session['user_id'])
-    job_id = request.POST.get('job_id', '')
-    jobs = request.session.get('jobs', [])
-    job = next((j for j in jobs if j['job_id'] == job_id), None)
+    user = models.get_user_by_id(
+        request.session['user_id']
+    )
 
-    if not job or not job['apply_link']:
-        messages.error(request, 'Job not found, please search again')
+    job_id = request.POST.get(
+        'job_id',
+        ''
+    )
+
+    job_url = request.POST.get(
+        'job_url',
+        ''
+    )
+
+    jobs = request.session.get(
+        'jobs',
+        []
+    )
+
+    job = None
+
+    # Try to find the job in the current search session
+    if job_id:
+        job = next(
+            (
+                job_item
+                for job_item in jobs
+                if job_item.get('job_id') == job_id
+            ),
+            None
+        )
+
+    # If not found, try Saved Jobs
+    if not job and job_url:
+        favorite = models.Favorite.objects.filter(
+            user=user,
+            job_url=job_url
+        ).first()
+
+        if favorite:
+            job = {
+                'job_id': '',
+                'title': favorite.job_title,
+                'company': favorite.company,
+                'location': favorite.location or '',
+                'description': (
+                    favorite.job_description or ''
+                ),
+                'apply_link': favorite.job_url,
+            }
+
+    if not job or not job.get('apply_link'):
+        messages.error(
+            request,
+            'Job not found, please search again'
+        )
         return redirect('/dashboard')
 
-    # Can't apply to the same job more than one time
-    if models.has_applied(user.id, job['apply_link']):
-        messages.error(request, 'You already applied to this job')
+    # Prevent duplicate applications
+    if models.has_applied(
+        user.id,
+        job['apply_link']
+    ):
+        messages.error(
+            request,
+            'You already applied to this job'
+        )
         return redirect('/dashboard')
 
-    models.create_application(user, job)
-    messages.success(request, 'Job added to My Applications')
-    return redirect('/dashboard')    
+    models.create_application(
+        user,
+        job
+    )
+
+    messages.success(
+        request,
+        'Job added to My Applications'
+    )
+
+    return redirect('/dashboard')  
 
 def application_details(request, id):
     # Check if user is logged in

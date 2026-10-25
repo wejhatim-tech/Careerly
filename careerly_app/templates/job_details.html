@@ -72,6 +72,7 @@
                     <form action="/job/apply" method="post" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="job_id" value="{{ job.job_id }}">
+                        <input type="hidden"name="job_url"value="{{ job.apply_link }}">
                         {% if applied %}
                         <button type="button" class="btn job-applied-btn done" disabled>Applied ✓</button>
                         {% else %}
