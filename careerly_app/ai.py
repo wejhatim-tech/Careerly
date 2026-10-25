@@ -67,29 +67,40 @@ def parse_json(text):
         return None
 
 
-# Keep only the job fields we need
 def clean_job(job):
     city = job.get('job_city') or ''
     country = job.get('job_country') or ''
+    location = job.get('job_location') or ''
+
+    if not location:
+        location = ', '.join(
+            part
+            for part in [city, country]
+            if part
+        )
 
     return {
         'job_id': job.get('job_id'),
         'title': job.get('job_title'),
         'company': job.get('employer_name'),
-        'location': job.get('job_location') or ', '.join(
-            part for part in [city, country] if part
+        'location': location,
+        'country': country,
+        'employment_type': job.get(
+            'job_employment_type'
         ),
-        'employment_type': job.get('job_employment_type'),
         'is_remote': job.get('job_is_remote'),
-        'description': job.get('job_description') or '',
+        'description': (
+            job.get('job_description') or ''
+        ),
         'apply_link': job.get('job_apply_link'),
-        'expiration_timestamp': job.get('job_offer_expiration_timestamp'),
+        'expiration_timestamp': job.get(
+            'job_offer_expiration_timestamp'
+        ),
     }
-
-
-# Country codes for the user's preferred location
+    # Country codes for the user's preferred location
 COUNTRY_CODES = {
     'palestine': 'ps',
+    'west bank': 'ps',
     'jordan': 'jo',
     'amman': 'jo',
     'saudi': 'sa',
@@ -100,7 +111,9 @@ COUNTRY_CODES = {
     'kuwait': 'kw',
     'egypt': 'eg',
     'usa': 'us',
+    'united states': 'us',
     'uk': 'gb',
+    'united kingdom': 'gb',
     'germany': 'de',
     'canada': 'ca',
 }
@@ -117,17 +130,22 @@ def get_country_code(location):
 
 
 
-# Search live jobs from Google for Jobs
-def search_jobs(query, country='jo', num=10, remote=False):
+def search_jobs(query, country=None, num=10, remote=False):
     try:
         params = {
             'query': query,
             'num_pages': 1,
-            'country': country,
             'date_posted': 'month'
         }
+
+        # Add country when searching in a specific country
+        if country:
+            params['country'] = country
+
+        # Only return remote jobs when remote is requested
         if remote:
             params['work_from_home'] = True
+
         response = None
 
         for attempt in range(2):
@@ -143,29 +161,48 @@ def search_jobs(query, country='jo', num=10, remote=False):
                 break
 
             except requests.RequestException as e:
-                print(f'JSearch attempt {attempt + 1} failed:', e)
+                print(
+                    f'JSearch attempt {attempt + 1} failed:',
+                    e
+                )
                 response = None
 
         if response is None:
             return []
-        
+
         data = response.json().get('data', {})
-        jobs = data.get('jobs', []) if isinstance(data, dict) else data
+
+        jobs = (
+            data.get('jobs', [])
+            if isinstance(data, dict)
+            else data
+        )
+
         valid_jobs = []
         current_time = int(time.time())
+
         for job in jobs:
             cleaned_job = clean_job(job)
-            # Skip jobs without an apply link
+
+            # Skip jobs without an application link
             if not cleaned_job.get('apply_link'):
                 continue
-            expiration = cleaned_job.get('expiration_timestamp')
+
+            expiration = cleaned_job.get(
+                'expiration_timestamp'
+            )
+
             # Skip expired jobs
             if expiration and expiration < current_time:
                 continue
+
             valid_jobs.append(cleaned_job)
+
             if len(valid_jobs) >= num:
                 break
+
         return valid_jobs
+
     except Exception as e:
         print('JSearch error:', e)
         return []
@@ -376,31 +413,181 @@ def career_level_match(user_level, job_title):
     return True
 
 def remote_location_match(user_location, job):
-    text = (
-        f"{job.get('location', '')} "
-        f"{job.get('description', '')}"
+    user_location = (
+        user_location or ''
+    ).lower().strip()
+
+    job_location = (
+        job.get('location', '') or ''
+    ).lower().strip()
+
+    job_country = (
+        job.get('country', '') or ''
+    ).lower().strip()
+
+    description = (
+        job.get('description', '') or ''
     ).lower()
 
-    blocked_phrases = [
-        'us only',
-        'u.s. only',
-        'united states only',
-        'must reside in the us',
-        'must reside in the united states',
-        'us work authorization required',
-        'u.s. work authorization required',
-        'eu only',
-        'europe only',
-        'must reside in germany',
-        'germany only',
-        'uk only',
-        'united kingdom only',
-        'canada only',
+    job_text = (
+        f"{job_location} "
+        f"{job_country} "
+        f"{description}"
+    )
+
+    country_aliases = {
+        'palestine': [
+            'palestine',
+            'palestinian territories',
+            'west bank'
+        ],
+        'jordan': [
+            'jordan'
+        ],
+        'usa': [
+            'united states',
+            'usa',
+            'u.s.',
+            'u.s.a.',
+            'us'
+        ],
+        'uk': [
+            'united kingdom',
+            'uk',
+            'u.k.'
+        ],
+        'canada': [
+            'canada'
+        ],
+        'germany': [
+            'germany'
+        ],
+        'uae': [
+            'united arab emirates',
+            'uae',
+            'u.a.e.'
+        ],
+        'saudi': [
+            'saudi arabia'
+        ],
+        'qatar': [
+            'qatar'
+        ],
+        'kuwait': [
+            'kuwait'
+        ],
+        'egypt': [
+            'egypt'
+        ],
+    }
+
+    user_country = None
+
+    for country, aliases in country_aliases.items():
+        for alias in aliases:
+            if alias in user_location:
+                user_country = country
+                break
+
+        if user_country:
+            break
+
+    worldwide_phrases = [
+        'remote worldwide',
+        'worldwide remote',
+        'work from anywhere',
+        'work from any country',
+        'anywhere in the world',
+        'global remote',
+        'location: worldwide'
     ]
 
-    for phrase in blocked_phrases:
-        if phrase in text:
-            return False
+    for phrase in worldwide_phrases:
+        if phrase in job_text:
+            return True
+
+    # Detect country from both job country and job location
+    job_country_name = None
+
+    location_text = (
+        f"{job_country} {job_location}"
+    )
+
+    for country, aliases in country_aliases.items():
+        for alias in aliases:
+            if alias in location_text:
+                job_country_name = country
+                break
+
+        if job_country_name:
+            break
+
+    # Reject a remote job tied to another country
+    if (
+        job_country_name
+        and user_country
+        and job_country_name != user_country
+    ):
+        return False
+
+    # Explicit country restrictions
+    for country, aliases in country_aliases.items():
+        for alias in aliases:
+            restricted_phrases = [
+                f'{alias} only',
+                f'only in {alias}',
+                f'must reside in {alias}',
+                f'must live in {alias}',
+                f'must be located in {alias}',
+                f'located in {alias} only',
+                f'residents of {alias} only',
+                f'authorized to work in {alias}',
+                f'work authorization in {alias}',
+                f'eligible to work in {alias}',
+            ]
+
+            for phrase in restricted_phrases:
+                if phrase in job_text:
+                    if user_country != country:
+                        return False
+
+    europe_restrictions = [
+        'eu only',
+        'europe only',
+        'european union only',
+        'must reside in the eu',
+        'must reside in europe',
+        'must be located in europe',
+        'remote within europe'
+    ]
+
+    european_locations = [
+        'germany',
+        'france',
+        'spain',
+        'italy',
+        'netherlands',
+        'belgium',
+        'austria',
+        'sweden',
+        'denmark',
+        'finland',
+        'ireland',
+        'portugal',
+        'poland',
+        'greece',
+        'czech',
+        'romania',
+        'croatia'
+    ]
+
+    for phrase in europe_restrictions:
+        if phrase in job_text:
+            if not any(
+                location in user_location
+                for location in european_locations
+            ):
+                return False
 
     return True
 
