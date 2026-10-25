@@ -11,9 +11,9 @@ load_dotenv()
 client = genai.Client(
     api_key=os.getenv('GEMINI_API_KEY'),
     http_options=types.HttpOptions(
-        timeout=20000,
+        timeout=30000,
         retry_options=types.HttpRetryOptions(
-            attempts=1
+            attempts=2
         )
     )
 )
