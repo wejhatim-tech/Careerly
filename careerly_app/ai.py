@@ -171,20 +171,6 @@ def search_jobs(query, country='jo', num=10, remote=False):
         return []
 
 
-# Get one job by its id (for the Job Details page)
-def get_job(job_id):
-    try:
-        response = requests.get(
-            f'{JSEARCH_URL}/job-details',
-            headers=JSEARCH_HEADERS,
-            params={'job_id': job_id},
-            timeout=20,
-        )
-        jobs = response.json().get('data', [])
-        return clean_job(jobs[0]) if jobs else None
-    except Exception:
-        return None
-
 
 # Ask Gemini to pick the best 5 jobs for this profile
 def match_jobs(profile, skills, jobs):
@@ -270,9 +256,7 @@ match must be one of: Excellent, Good, Possible.
 
     ai_answer = ask_ai(prompt)
 
-    # Temporary print so we can see what Gemini returned
-    print("GEMINI RESPONSE:")
-    print(ai_answer)
+
 
     result = parse_json(ai_answer)
 
@@ -343,15 +327,6 @@ def career_level_match(user_level, job_title):
         "manager",
         "head",
         "director"
-    ]
-
-    junior_words = [
-        "junior",
-        "entry level",
-        "entry-level",
-        "new grad",
-        "graduate",
-        "intern"
     ]
 
     if level == "junior":
