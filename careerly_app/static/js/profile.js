@@ -76,3 +76,30 @@ document.addEventListener('click', function (event) {
         }
     });
 });
+
+// Show the selected options inside the dropdown box
+function updateDropdownText(dropdown) {
+    const summary = dropdown.querySelector('summary');
+    const selected = Array.from(dropdown.querySelectorAll('input:checked'))
+        .map(input => input.parentElement.textContent.trim());
+
+    summary.textContent = selected.length ? selected.join(', ') : summary.dataset.placeholder;
+}
+
+document.querySelectorAll('.check-dropdown').forEach(function (dropdown) {
+    const summary = dropdown.querySelector('summary');
+    summary.dataset.placeholder = summary.textContent;
+    updateDropdownText(dropdown);
+    dropdown.addEventListener('change', function () {
+        updateDropdownText(dropdown);
+    });
+});
+
+// Convert Arabic numbers (٠-٩) to English numbers (0-9)
+document.querySelectorAll('input[name="years_experience"]').forEach(function (input) {
+    input.addEventListener('input', function () {
+        input.value = input.value.replace(/[٠-٩]/g, function (digit) {
+            return '٠١٢٣٤٥٦٧٨٩'.indexOf(digit);
+        });
+    });
+});

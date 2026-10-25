@@ -57,7 +57,7 @@
 
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">Years of Experience</label>
-                                <input type="number" name="years_experience" min="0" class="form-control careerly-input" placeholder="0">
+                                <input type="text" inputmode="numeric" name="years_experience" min="0" class="form-control careerly-input" placeholder="0">
                             </div>
                         </div>
 
@@ -72,6 +72,8 @@
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">Work Mode</label>
+                                <details class="check-dropdown">
+                                    <summary>Select work mode</summary>
                                 <div class="check-group">
                                     <label class="check-option">
                                         <input type="checkbox" name="work_mode" value="remote" {% if 'remote' in profile.work_mode_list %}checked{% endif %}>
@@ -86,6 +88,7 @@
                                         On-site
                                     </label>
                                 </div>
+                                </details>
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">Employment Type</label>
@@ -154,7 +157,7 @@
 
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">Years of Experience</label>
-                                <input type="number" name="years_experience" min="0" class="form-control careerly-input" value="{{ profile.years_experience }}">
+                                <input type="text" inputmode="numeric" name="years_experience" min="0" class="form-control careerly-input" value="{{ profile.years_experience }}">
                             </div>
                         </div>
 
