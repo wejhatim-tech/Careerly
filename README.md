@@ -6,7 +6,7 @@ Careerly is a Django web app that works as a personal AI career coach. Job seeke
 
 Built by **Wejdan Hatim** and **Khawla Qusay** as a group project for the **Axsos Academy Full-Stack Bootcamp** (October 2026).
 
-🔗 **Live demo:** coming soon
+🔗 **Live demo:** http://13.53.131.76/
 
 ---
 
